@@ -60,7 +60,34 @@ class Applicant(User):
     def clean(self):
         if self.resume.size > 5 * 1024 * 1024:
             raise ValidationError("File size too large. Maximum size allowed is 5 MB.")
+    
+    def get_certificates(self):
+        try:
+            Certificate = django_apps.get_model('posts.Certificate')
+            return Certificate.objects.filter(applicant=self)
+        except Certificate.DoesNotExist:
+            return None
+    
+    def get_applications(self):
+        try:
+            Application = django_apps.get_model('posts.Application')
+            return Application.objects.filter(applicant=self)
+        except Application.DoesNotExist:
+            return None
         
+    def get_evaluations(self):
+        try:
+            Evaluation = django_apps.get_model('posts.Evaluation')
+            return Evaluation.objects.filter(applicant=self)
+        except Evaluation.DoesNotExist:
+            return None
+        
+    def get_notifications(self):
+        try:
+            return Notification.objects.filter(notify_to=self, is_read=False)
+        except Notification.DoesNotExist:
+            return None
+  
         
 class Student(Applicant):
     university = models.CharField(max_length=100, choices=UNIVERSITY_CHOICES, help_text="Choose your university", blank=False, null=False)
@@ -108,6 +135,13 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_posts(self):
+        try:
+            Post = django_apps.get_model("posts.Post")
+            return Post.objects.filter(organization=self)
+        except Post.DoesNotExist:
+            return None
 
 
 class UniversityCoordinator(User):
@@ -127,9 +161,17 @@ class UniversityCoordinator(User):
 
     def __str__(self):
         return self.first_name
+    
+    def get_assignments(self):
+        try:
+            Assignment = django_apps.get_model("posts.Assignment")
+            return Assignment.objects.filter(coordinator=self)
+        except Assignment.DoesNotExist:
+            return None
 
 
 class UniversitySupervisor(User):
+    coordinator = models.ForeignKey(UniversityCoordinator, on_delete=models.CASCADE)
     university = models.CharField(max_length=100, choices=UNIVERSITY_CHOICES, help_text="Select the university associated with the supervisor", blank=False, null=False)
     department = models.CharField(max_length=100, help_text="Enter the department where the supervisor is working")
     specialization = models.CharField(max_length=100, help_text="Specify the supervisor's area of expertise (e.g., Machine Learning, Data Science)")
@@ -140,6 +182,14 @@ class UniversitySupervisor(User):
 
     def __str__(self):
         return self.first_name
+
+    def get_students(self):
+        try:
+            Assignment = django_apps.get_model("posts.Assignment")
+            assignments = Assignment.objects.select_related('student').filter(supervisor=self)
+            return [assign.student for assign in assignments]
+        except Assignment.DoesNotExist:
+            return None
 
 
 class Notification(models.Model):

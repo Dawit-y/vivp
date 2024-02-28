@@ -48,6 +48,23 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    def get_tasks(self):
+        try:
+            return Task.objects.filter(post=self)
+        except Task.DoesNotExist:
+            return None
+        
+    def get_requirements(self):
+        try:
+            return Requirement.objects.filter(post=self)
+        except Requirement.DoesNotExist:
+            return None
+        
+    def get_applications(self):
+        try:
+            return Application.objects.filter(post=self)
+        except Application.DoesNotExist:
+            return None
 
 
 class Task(models.Model):
@@ -64,6 +81,12 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_task_submissions(self):
+        try:
+            return TaskSubmission.objects.filter(task=self)
+        except TaskSubmission.DoesNotExist:
+            return None
 
 
 class TaskSubmission(models.Model):
@@ -86,7 +109,7 @@ class Requirement(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Requirement {self.id}"
+        return f"Requirement for {self.post}"
 
 class Application(models.Model):
 
@@ -145,6 +168,7 @@ class Evaluation(models.Model):
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     comment = models.TextField(blank=True)
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True)
