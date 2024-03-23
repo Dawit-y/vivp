@@ -142,6 +142,16 @@ class Organization(models.Model):
             return Post.objects.filter(organization=self)
         except Post.DoesNotExist:
             return None
+    def get_applicants(self):
+        posts = self.get_posts()
+        applications = []
+        for post in posts:
+            applications.append(post.get_applications())
+        applicants = []
+        for queryset in applications:
+            for application in queryset:
+                applicants.append(application.applicant)
+        return applicants
 
 
 class UniversityCoordinator(User):
@@ -169,6 +179,11 @@ class UniversityCoordinator(User):
         except Assignment.DoesNotExist:
             return None
 
+    def get_students(self):
+        try:
+            return Student.objects.filter(university=self.university)
+        except Student.DoesNotExist:
+            return None
 
 class UniversitySupervisor(User):
     coordinator = models.ForeignKey(UniversityCoordinator, on_delete=models.CASCADE)
