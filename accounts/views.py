@@ -18,5 +18,9 @@ class OrganiztionViewSet(ModelViewSet):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 
-class UniversityCoordinatorModelViewSet(ModelViewSet):
-    pass
+class UniversityCoordinatorViewSet(ModelViewSet):
+    queryset = UniversityCoordinator.objects.all()
+    serializer_class = UvCoordinatorSerializer
+class UniversitySupervisorViewSet(ModelViewSet):
+    queryset = UniversitySupervisor.objects.all()
+    serializer_class = UvSupervisorSerializer
