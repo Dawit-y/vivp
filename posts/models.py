@@ -87,7 +87,12 @@ class Task(models.Model):
             return TaskSubmission.objects.filter(task=self)
         except TaskSubmission.DoesNotExist:
             return None
-
+    
+    def get_evaluation(self):
+        try:
+            return Evaluation.objects.filter(task=self)
+        except Evaluation.DoesNotExist:
+            return None
 
 class TaskSubmission(models.Model):
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name="submission")
@@ -169,13 +174,13 @@ class Evaluation(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     comment = models.TextField(blank=True)
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    grade = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        help_text="Enter a numerical value out of one hundred to indicate how well the task is completed."
+    )
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-
-    # Rather than pass or fail, It should be mark/grade or something and then calculated to give overall value for the internship, it may differ between applicants and students
-    # pass_fail = models.CharField(max_length=10, choices=PassOrFailChoices.choices, blank=True, null=True)
 
     def __str__(self):
         return f"Evaluation for {self.task.title}"

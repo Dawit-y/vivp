@@ -142,16 +142,15 @@ class Organization(models.Model):
             return Post.objects.filter(organization=self)
         except Post.DoesNotExist:
             return None
+        
     def get_applicants(self):
-        posts = self.get_posts()
-        applications = []
-        for post in posts:
-            applications.append(post.get_applications())
-        applicants = []
-        for queryset in applications:
-            for application in queryset:
-                applicants.append(application.applicant)
-        return applicants
+        try:
+            posts = self.get_posts()
+            applications = [post.get_applications() for post in posts]
+            applicants = [application.applicant for queryset in applications for application in queryset]
+            return applicants
+        except Exception as e:
+            return None
 
 
 class UniversityCoordinator(User):
