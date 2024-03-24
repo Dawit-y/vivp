@@ -15,9 +15,11 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = ["id", "first_name", "last_name", "email", "age", "gender", "phone_number", "resume", "portfolio_link", "university", "university_id_number","batch","department", "date_joined"]
 
 class OrganizationSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Organization
         fields = '__all__'
+
 class UvCoordinatorSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -28,4 +30,9 @@ class UvSupervisorSerializer(serializers.ModelSerializer):
     class Meta:
         model=UniversitySupervisor
         fields = '__all__'
-    
+
+class NotificationsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Notification
+        fields = "__all__"

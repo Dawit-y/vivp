@@ -225,6 +225,3 @@ class Notification(models.Model):
         ]
         ordering = ['-updated', '-created']
         get_latest_by = "created"
-
-    def url(self):
-        return self.content_object.url

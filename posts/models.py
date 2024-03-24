@@ -68,6 +68,11 @@ class Post(models.Model):
 
 
 class Task(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending' , 'Pending'
+        COMPLETED = 'completed', 'completed'
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, help_text="Enter the title of the task")
     description = models.TextField(help_text="Enter a detailed description of the task")
@@ -162,16 +167,6 @@ class Certificate(models.Model):
 
 
 class Evaluation(models.Model):
-
-    class Status(models.TextChoices):
-        PENDING = 'pending' , 'Pending'
-        COMPLETED = 'completed', 'completed'
-
-    class PassOrFailChoices(models.TextChoices):
-        PASS = 'pass' , 'pass'
-        FAIL = 'fail', 'fail'
-
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     comment = models.TextField(blank=True)
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
     grade = models.DecimalField(
