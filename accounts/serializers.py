@@ -18,3 +18,14 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = '__all__'
+class UvCoordinatorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=UniversityCoordinator
+        fields = ['university','legal_documnet']
+class UvSupervisorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=UniversitySupervisor
+        fields = '__all__'
+    

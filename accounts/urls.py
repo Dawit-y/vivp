@@ -6,6 +6,9 @@ router = routers.DefaultRouter()
 router.register("applicants", views.ApplicantViewSet)
 router.register("students", views.StudentViewSet)
 router.register("organizations", views.OrganiztionViewSet)
+router.register("UvCoordniators", views.UniversityCoordinatorViewSet)
+router.register("UvSupervisors", views.UniversitySupervisorViewSet)
+
 
 
 urlpatterns = router.urls
