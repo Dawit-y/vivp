@@ -23,7 +23,7 @@ class UvCoordinatorSerializer(serializers.ModelSerializer):
     class Meta:
         model=UniversityCoordinator
         fields = ['university','legal_documnet']
-class UvSpervisorSerializer(serializers.ModelSerializer):
+class UvSupervisorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=UniversitySupervisor
