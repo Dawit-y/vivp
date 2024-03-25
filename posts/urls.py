@@ -5,7 +5,10 @@ from . import views
 
 router = routers.DefaultRouter()
 
-# router.register("posts",views.PostViewSet,basename='posts')
+router.register("applications",views.ApplicationViewSet)
+router.register("certificates",views.CertificateViewSet)
+router.register("evaluations",views.EvaluationViewSet)
+
 
 
 urlpatterns = [

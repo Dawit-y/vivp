@@ -1,9 +1,6 @@
-from typing import Any
 from django.db import models
 
 from accounts.models import *
-
-from django.db import models
 
 class Post(models.Model):
     TYPE_CHOICES = [
