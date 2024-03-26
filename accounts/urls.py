@@ -10,16 +10,16 @@ router.register("UvCoordniators", views.UniversityCoordinatorViewSet)
 router.register("UvSupervisors", views.UniversitySupervisorViewSet)
 
 applications_router = routers.NestedDefaultRouter(router, 'applicants', lookup='applicant')
-applications_router.register('applications', views.ApplicationsViewSet, basename="application-applicant")
+applications_router.register('applications', views.ApplicantApplicationsViewSet, basename="application-applicant")
 
 certificates_router = routers.NestedDefaultRouter(router, 'applicants', lookup='applicant')
-certificates_router.register('certificates', views.CertificatesViewSet, basename="certificate-applicant")
+certificates_router.register('certificates', views.ApplicantCertificatesViewSet, basename="certificate-applicant")
 
 notifications_router = routers.NestedDefaultRouter(router, 'applicants', lookup='applicant')
-notifications_router.register('notifications', views.NotificationsViewSet, basename="notification-applicant")
+notifications_router.register('notifications', views.ApplicantNotificationsViewSet, basename="notification-applicant")
 
 evaluatons_router = routers.NestedDefaultRouter(router, 'applicants', lookup='applicant')
-evaluatons_router.register('evaluations', views.EvaluationViewSet, basename="evaluation-applicant")
+evaluatons_router.register('evaluations', views.ApplicantEvaluationViewSet, basename="evaluation-applicant")
 
 
 
