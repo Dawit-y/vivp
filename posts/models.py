@@ -67,6 +67,7 @@ class Post(models.Model):
 class Task(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending' , 'Pending'
+        SUBMITTED = 'submitted','submitted' 
         COMPLETED = 'completed', 'completed'
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)

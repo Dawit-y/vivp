@@ -57,3 +57,30 @@ class ApplicantEvaluationViewSet(ModelViewSet):
         applicant_pk = self.kwargs.get("applicant_pk")
         return Evaluation.objects.filter(applicant__id=applicant_pk)
 
+class OrganizationPostViewSet(ModelViewSet):
+    serializer_class = PostListSerializer
+
+    def get_queryset(self):
+        organization_pk = self.kwargs.get("organization_pk")
+        return Post.objects.filter(organization_id=organization_pk)
+class OrganizationSubmittedTasksView(ModelViewSet):
+    serializer_class = TaskSubmissionSerializer
+    
+    def get_queryset(self):
+        organization_pk = self.kwargs.get("organization_pk")
+        posts = Post.objects.filter(organization_id=organization_pk)
+        print('posts', posts)
+        
+        submitted_tasks = TaskSubmission.objects.filter(task__post__in=posts, task__status='submitted')
+        print('submitted_tasks', submitted_tasks)
+        
+        return submitted_tasks
+class OrganizationApplicationViewSet(ModelViewSet):
+    serializer_class = ApplicationSerializer
+
+    def get_queryset(self):
+        organization_pk = self.kwargs.get("organization_pk")
+        posts = Post.objects.filter(organization_id=organization_pk)
+
+        applications = Application.objects.filter(post__in = posts)
+        return applications
