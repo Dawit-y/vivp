@@ -25,6 +25,7 @@ class UvCoordinatorSerializer(serializers.ModelSerializer):
     class Meta:
         model=UniversityCoordinator
         fields = '__all__'
+
 class UvSupervisorSerializer(serializers.ModelSerializer):
 
     class Meta:
