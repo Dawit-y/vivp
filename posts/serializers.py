@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from .models import *
@@ -78,4 +79,35 @@ class EvaluationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Evaluation
-        fields = "__all__"
+        fields = ['comment','grade','updated','created']
+    def create(self,validated_data):
+        evaluation = Evaluation(**validated_data)
+        submitted_pk = self.context['submitted_pk']
+        print("hello",submitted_pk)
+        task_submission = get_object_or_404(TaskSubmission, id=submitted_pk)
+        evaluation.task = task_submission.task
+        evaluation.applicant = task_submission.applicant
+        evaluation.save()
+        return evaluation
+    
+class TaskSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskSubmission
+        fields ='__all__'
+class AssignmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Assignment
+        fields = ['student','supervisor','updated','created']
+    def create(self,validated_data):
+        UvCoordniators_pk = self.context.get('UvCoordniators_pk')
+        assignment = Assignment(**validated_data)
+        
+        uvcoordinator = get_object_or_404(UniversityCoordinator, id=UvCoordniators_pk)
+        assignment.coordinator = uvcoordinator
+        print('hello',uvcoordinator)
+        assignment.save()
+        print('there',assignment)
+        return assignment
+
+

@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 
 from .models import *
@@ -46,3 +47,4 @@ class EvaluationViewSet(ModelViewSet):
     queryset = Evaluation.objects.all()
     serializer_class = EvaluationSerializer
     filterset_fields = ["applicant", "task"]
+
