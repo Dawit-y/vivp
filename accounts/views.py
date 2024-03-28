@@ -59,7 +59,7 @@ class ApplicantEvaluationViewSet(ModelViewSet):
         return Evaluation.objects.filter(applicant__id=applicant_pk)
 
 class OrganizationPostViewSet(ModelViewSet):
-    serializer_class = PostListSerializer
+    serializer_class = PostSerializer
 
     def get_queryset(self):
         organization_pk = self.kwargs.get("organization_pk")
