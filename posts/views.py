@@ -1,38 +1,36 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.generics import GenericAPIView
 
 from .models import *
 from .serializers import *
 
 
-class PostListRetrieveView(ListModelMixin, RetrieveModelMixin, GenericAPIView):
+class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
+    serializer_class = PostSerializer
     
-    def get_serializer_class(self):
-        if self.kwargs.get('pk'):
-            return PostDetailSerializer
-        else:
-            return PostListSerializer
-
-    def get(self, request, *args, **kwargs):
-        if 'pk' in kwargs:
-            return self.retrieve(request, *args, **kwargs)
-        else:
-            return self.list(request, *args, **kwargs)
-    
-class PostApplicationsListRetrieveView(ListModelMixin, RetrieveModelMixin, GenericAPIView):
+class PostApplicationsViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
 
     def get_queryset(self):
-        post_pk = self.kwargs.get("pk")
-        return Application.objects.filter(post__pk = post_pk)
+        post_pk = self.kwargs.get("post_pk")
+        return Application.objects.filter(post__id=post_pk)
+
+class PostTaskViewSet(ModelViewSet):
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        post_pk = self.kwargs.get("post_pk")
+        return Task.objects.filter(post__id=post_pk)
+
+class TaskViewSet(ModelViewSet):
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
     
-    def get(self, request, *args, **kwargs):
-        if 'id' in kwargs:
-            return self.retrieve(request, *args, **kwargs)
-        else:
-            return self.list(request, *args, **kwargs)
+class TaskSectionsViewSet(ModelViewSet):
+    serializer_class = TaskSectionSerializer
+    def get_queryset(self):
+        task_pk = self.kwargs.get("task_pk")
+        return TaskSection.objects.filter(task__id=task_pk)
     
 class ApplicationViewSet(ModelViewSet):
     queryset = Application.objects.all()

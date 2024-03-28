@@ -1,8 +1,15 @@
 from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field
 
 from accounts.models import *
 
+
+
 class Post(models.Model):
+    class Status(models.TextChoices):
+        INPROGRESS = 'Inprogress' , 'Inprogress'
+        COMPLETED = 'Completed', 'Completed'
+
     TYPE_CHOICES = [
         ('Internship', 'Internship'),
         ('VolunteerWork', 'Volunteer Work'),
@@ -24,7 +31,7 @@ class Post(models.Model):
         ('Software Engineering', 'Software Engineering'),
         ('Other', 'Other'),
     ]
-
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INPROGRESS)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, help_text="Enter the title of the post")
     description = models.TextField(help_text="Enter a detailed description of the post")
@@ -65,19 +72,9 @@ class Post(models.Model):
 
 
 class Task(models.Model):
-    class Status(models.TextChoices):
-        PENDING = 'pending' , 'Pending'
-        COMPLETED = 'completed', 'completed'
-
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, help_text="Enter the title of the task")
-    description = models.TextField(help_text="Enter a detailed description of the task")
-    resource_url = models.URLField(blank=True, help_text="Enter a URL for additional resources related to the task (if any)")
-    resource_video = models.URLField(blank=True, help_text="Enter a URL for a video resource related to the task (if any)")
     duration = models.CharField(max_length=100, help_text="Enter the estimated duration of the task (e.g., '1 hour', '30 minutes')")
-    is_file = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a file e.g txt, pdf, patch, doc")
-    is_url = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a url for the solution e.g github link, google drive link")
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -95,12 +92,48 @@ class Task(models.Model):
             return Evaluation.objects.filter(task=self)
         except Evaluation.DoesNotExist:
             return None
+    def get_task_sections(self):
+        try:
+            return TaskSection.objects.filter(task=self)
+        except TaskSection.DoesNotExist:
+            return None
+
+class TaskSection(models.Model):
+
+    TITLE_CHOICES = [
+    ("video_instruction", "Video Instruction"),
+    ("background_info", "Background Information"),
+    ("task_brief", "Task Brief"),
+    ("task_resource", "Task Resource"),
+    ("submit_task", "Submit Task"),
+    ("example_solution", "Example Solution"),
+    ]
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="section")
+    title = models.CharField(max_length=250,choices=TITLE_CHOICES, ) 
+    content = CKEditor5Field()
+    is_file = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a file ? e.g txt, pdf, patch, doc")
+    is_url = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a url for the solution ? e.g github link, google drive link")
+    is_text = models.BooleanField(default=False, help_text="Do you want applicants to submit this task by writting their answer ?")
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} of task {self.task}"
+
+    
 
 class TaskSubmission(models.Model):
+    class Status(models.TextChoices):
+        INPROGRESS = 'Inprogress' , 'Inprogress'
+        SUBMITTED = "Submitted", "Submitted"
+        COMPLETED = 'Completed', 'Completed'
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INPROGRESS)
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name="submission")
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="submission")
     submited_url = models.URLField(null=True, blank=True, help_text="Submit solution's url")
     submited_file = models.FileField(upload_to="submissions/", null=True, blank=True, help_text="Submit solution's file")
+    submitted_text = CKEditor5Field(null=True, blank=True)
 
     def __str__(self):
         return f"submission for task {self.task} by {self.applicant}"
@@ -122,8 +155,8 @@ class Application(models.Model):
 
     class Status(models.TextChoices):
         PENDING = 'pending' , 'Pending'
-        COMPLETED = 'accepted', 'accepted'
-        REJECTED = 'rejected', 'rejected'
+        ACCEPTED = 'accepted', 'Accepted'
+        REJECTED = 'rejected', 'Rejected'
 
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE) 
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
