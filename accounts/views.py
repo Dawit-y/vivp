@@ -70,7 +70,7 @@ class OrganizationSubmittedTasksView(ModelViewSet):
     def get_queryset(self):
         organization_pk = self.kwargs.get("organization_pk")
         posts = Post.objects.filter(organization_id=organization_pk)
-        submitted_tasks = TaskSubmission.objects.filter(task__post__in=posts, task__status='submitted')
+        submitted_tasks = TaskSubmission.objects.filter(task__post__in=posts)
         return submitted_tasks
 class OrganizationApplicationViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
@@ -86,8 +86,8 @@ class UvCoordinatorassignment(ModelViewSet):
 
     def get_queryset(self):
         UvCoordniators_pk = self.kwargs.get("UvCoordniators_pk")
-        print('hello',self.kwargs)
         return Assignment.objects.filter(coordinator_id=UvCoordniators_pk)
+    
     def get_serializer_context(self, *args, **kwargs):
         UvCoordniators_pk=self.kwargs.get("UvCoordniators_pk")
         return {'UvCoordniators_pk':UvCoordniators_pk }       

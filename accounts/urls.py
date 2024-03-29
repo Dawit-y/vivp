@@ -23,17 +23,19 @@ evaluatons_router.register('evaluations', views.ApplicantEvaluationViewSet, base
 
 organization_post_router= routers.NestedDefaultRouter(router, 'organizations',lookup='organization')
 organization_post_router.register('posts', views.OrganizationPostViewSet, basename="organization_post")
+
 organization_submittedtaks_router=routers.NestedDefaultRouter(router,'organizations',lookup='organization')
 organization_submittedtaks_router.register('submitted_tasks', views.OrganizationSubmittedTasksView, basename="organization_submitted_tasks")
-evaluate_router = routers.NestedDefaultRouter(
-    organization_submittedtaks_router, 'submitted_tasks', lookup='submitted_tasks'
-)
+
+evaluate_router = routers.NestedDefaultRouter(organization_submittedtaks_router, 'submitted_tasks', lookup='submitted_tasks')
 evaluate_router.register('evaluate', views.EvaluateViewSet, basename='evaluate')
+
 organization_application_router = routers.NestedDefaultRouter(router,'organizations',lookup='organization')
 organization_application_router.register('applications', views.OrganizationApplicationViewSet, basename="organization_application")
 
 uvcoordinator_assign = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
 uvcoordinator_assign.register('assignments', views.UvCoordinatorassignment, basename="UvCoordniators_assignment")
+
 urlpatterns = (
     router.urls +
     applications_router.urls +

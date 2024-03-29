@@ -87,6 +87,13 @@ class Applicant(User):
             return Notification.objects.filter(notify_to=self, is_read=False)
         except Notification.DoesNotExist:
             return None
+        
+    def get_submitted_tasks(self):
+        try:
+            TaskSubmission = django_apps.get_model('posts.TaskSubmission')
+            return TaskSubmission.objects.filter(applicant=self)
+        except TaskSubmission.DoesNotExist:
+            return None
   
         
 class Student(Applicant):

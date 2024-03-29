@@ -6,9 +6,6 @@ from accounts.models import *
 
 
 class Post(models.Model):
-    class Status(models.TextChoices):
-        INPROGRESS = 'Inprogress' , 'Inprogress'
-        COMPLETED = 'Completed', 'Completed'
 
     TYPE_CHOICES = [
         ('Internship', 'Internship'),
@@ -31,7 +28,7 @@ class Post(models.Model):
         ('Software Engineering', 'Software Engineering'),
         ('Other', 'Other'),
     ]
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INPROGRESS)
+
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, help_text="Enter the title of the post")
     description = models.TextField(help_text="Enter a detailed description of the post")
@@ -157,10 +154,11 @@ class Application(models.Model):
         PENDING = 'pending' , 'Pending'
         ACCEPTED = 'accepted', 'Accepted'
         REJECTED = 'rejected', 'Rejected'
+        NOT_APPLIED = 'not_applied', 'Not Applied'
 
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE) 
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.NOT_APPLIED)
     skills = models.TextField(help_text="Write down your skills.", null=True, blank=True)
     cover_letter = models.TextField(help_text="Enter your motivation for choosing this company.", null=True, blank=True)
     availability = models.TextField(help_text="Enter your availability for the position.", null=True, blank=True)

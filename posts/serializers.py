@@ -4,36 +4,84 @@ from rest_framework import serializers
 from .models import *
 
 class PostSerializer(serializers.ModelSerializer):
+    tasks_count = serializers.SerializerMethodField(method_name="get_tasks_count")
+    status = serializers.SerializerMethodField(method_name="get_status")
     class Meta:
         model = Post
         fields = "__all__"
 
+    def get_tasks_count(self, post: Post):
+        return post.get_tasks().count()
+    
+    def get_status(self, post: Post):
+        request = self.context.get('request')
+        
+        if not request or not request.user.is_authenticated:
+            return "Unauthenticated User"
+        
+        user = request.user
+        
+        if not hasattr(user, 'applicant'):
+            return "Unauthorized Access"
+        
+        applicant: Applicant = user.applicant
+        
+        try:
+            application = Application.objects.filter(applicant=applicant, post=post).latest('created')
+            if application.status == "accepted":
+                submitted_tasks = applicant.get_submitted_tasks()
+                if all(task.status == "Completed" for task in submitted_tasks):
+                    return "Completed"
+                else:
+                    return "Inprogress"
+            else:
+                return f"{application.status} application"
+        except Application.DoesNotExist:
+            return "Not Applied"
+       
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['tasks_count'] = self.get_tasks_count(instance)
+        representation["status"] = self.get_status(instance)
+        return representation
+
 class TaskSerializer(serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
+    sections_count = serializers.SerializerMethodField(method_name="get_task_section_count")
+    status = serializers.SerializerMethodField(method_name="get_status")
 
     class Meta:
         model = Task
         fields = "__all__"
-
-    def get_status(self, obj):
+ 
+    def get_status(self, obj: Task):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            user = request.user
-            if hasattr(user, 'applicant'):
-                applicant = user.applicant
-                try:
-                    task_submission = TaskSubmission.objects.get(
-                        applicant=applicant,
-                        task=obj
-                    )
-                    return task_submission.status
-                except TaskSubmission.DoesNotExist:
-                    return None
-        return None
-
+        
+        if not request or not request.user.is_authenticated:
+            return "Unauthenticated User"
+        
+        user = request.user
+        
+        if not hasattr(user, 'applicant'):
+            return "Unauthorized Access"
+        
+        applicant: Applicant = user.applicant
+        
+        try:
+            task_submission = TaskSubmission.objects.get(
+                applicant=applicant,
+                task=obj
+            )
+            return task_submission.status
+        except TaskSubmission.DoesNotExist:
+            return "Inprogress"
+       
+    def get_task_section_count(self, task: Task):
+        return task.get_task_sections().count()
+    
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['status'] = self.get_status(instance)
+        representation["sections_count"] = self.get_task_section_count(instance)
         return representation
 
 class TaskSectionSerializer(serializers.ModelSerializer):
@@ -80,34 +128,35 @@ class EvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evaluation
         fields = ['comment','grade','updated','created']
+
     def create(self,validated_data):
-        evaluation = Evaluation(**validated_data)
-        submitted_pk = self.context['submitted_pk']
-        print("hello",submitted_pk)
+        submitted_pk = self.context.get('submitted_pk')
         task_submission = get_object_or_404(TaskSubmission, id=submitted_pk)
-        evaluation.task = task_submission.task
-        evaluation.applicant = task_submission.applicant
-        evaluation.save()
+        evaluation = Evaluation.objects.create(
+            task=task_submission.task,
+            applicant=task_submission.applicant,
+            **validated_data
+        )
+        
         return evaluation
     
 class TaskSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskSubmission
         fields ='__all__'
+        
 class AssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Assignment
         fields = ['student','supervisor','updated','created']
-    def create(self,validated_data):
-        UvCoordniators_pk = self.context.get('UvCoordniators_pk')
-        assignment = Assignment(**validated_data)
-        
-        uvcoordinator = get_object_or_404(UniversityCoordinator, id=UvCoordniators_pk)
-        assignment.coordinator = uvcoordinator
-        print('hello',uvcoordinator)
-        assignment.save()
-        print('there',assignment)
-        return assignment
 
+    def create(self,validated_data):
+        uv_coordinators_pk = self.context.get('UvCoordniators_pk')
+        uv_coordinator = get_object_or_404(UniversityCoordinator, id=uv_coordinators_pk)
+        assignment = Assignment.objects.create(
+            coordinator=uv_coordinator,
+            **validated_data
+        )
+        return assignment
 
