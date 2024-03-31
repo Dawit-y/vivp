@@ -128,26 +128,26 @@ class SimplePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['id', 'organization', 'title', 'type', 'level', 'category', 'duration']
-    
+
 class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ['status','skills','cover_letter','availability','other','updated','created']
+        fields = "__all__"
+    
+class PostApplicationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Application
+        fields = ["applicant",'status','skills','cover_letter','availability','other','updated','created']
+
     def create(self,validated_data):
         post_pk = self.context.get('post_pk')
-        # applicant_pk = self.context.get('applicants_pk')
-        # print(applicant_pk)
-        post = get_object_or_404(Post, id=post_pk)
-        # applicant = get_object_or_404(Applicant, id=applicant_pk)
-         
+        post = get_object_or_404(Post, id=post_pk)   
         application = Application.objects.create(
             post=post,
-            # applicant=applicant,
             **validated_data
         )
-        
-        
         return application
 
 class CertificateSerializer(serializers.ModelSerializer):
