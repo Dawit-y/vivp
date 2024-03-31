@@ -51,7 +51,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = "__all__"
+        fields = ['title','duration','created','updated','status','sections_count']
  
     def get_status(self, obj: Task):
         request = self.context.get('request')
@@ -83,21 +83,44 @@ class TaskSerializer(serializers.ModelSerializer):
         representation['status'] = self.get_status(instance)
         representation["sections_count"] = self.get_task_section_count(instance)
         return representation
-
+    
+    def create(self,validated_data):
+        post_pk = self.context.get('post_pk')
+        post = get_object_or_404(Post, id=post_pk)
+        task = Task.objects.create(
+            post = post,
+            **validated_data
+        )
+        
+        return task
 class TaskSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskSection
-        fields = "__all__"
+        fields = ['title','content','is_file','is_url','is_text','updated','created']
+    def create(self,validated_data):
+        task_pk = self.context.get('task_pk')
+        task = get_object_or_404(Task, id=task_pk)
+        task_section = TaskSection.objects.create(
+            task=task,
+            **validated_data
+        )
+        
+        return task_section
+    
 
-class TaskSubmissionsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TaskSubmission
-        fields = "__all__"
+
 class RequirementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Requirement
-        fields = "__all__"
-
+        fields = ['skills','cover_letter','availability','other','created','updated']
+    def create(self,validated_data):
+        post_pk = self.context.get('post_pk')
+        post = get_object_or_404(Post, id=post_pk)
+        requirement = Requirement.objects.create(
+            post = post,
+            **validated_data
+        )
+        return requirement  
 class PostDetailSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True, read_only=True)
     requirements = RequirementSerializer(many=True, read_only=True)
@@ -115,7 +138,22 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = "__all__"
+        fields = ['status','skills','cover_letter','availability','other','updated','created']
+    def create(self,validated_data):
+        post_pk = self.context.get('post_pk')
+        # applicant_pk = self.context.get('applicants_pk')
+        # print(applicant_pk)
+        post = get_object_or_404(Post, id=post_pk)
+        # applicant = get_object_or_404(Applicant, id=applicant_pk)
+         
+        application = Application.objects.create(
+            post=post,
+            # applicant=applicant,
+            **validated_data
+        )
+        
+        
+        return application
 
 class CertificateSerializer(serializers.ModelSerializer):
 

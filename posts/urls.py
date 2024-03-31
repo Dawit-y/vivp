@@ -14,10 +14,13 @@ router.register("evaluations",views.EvaluationViewSet)
 applications_router = routers.NestedDefaultRouter(router, 'posts', lookup='post')
 applications_router.register('applications', views.PostApplicationsViewSet, basename="post-applicaton")
 
+requirements_router = routers.NestedDefaultRouter(router, 'posts', lookup='post')
+requirements_router.register('requirements', views.PostRequirementsViewSet, basename="post-requirements")
+
 task_router = routers.NestedDefaultRouter(router, 'posts', lookup='post')
 task_router.register('tasks', views.PostTaskViewSet, basename="post-task")
 
 section_router = routers.NestedDefaultRouter(router, 'tasks', lookup='task')
 section_router.register('sections', views.TaskSectionsViewSet, basename="task-section")
 
-urlpatterns =  router.urls + applications_router.urls + task_router.urls + section_router.urls
+urlpatterns =  router.urls + applications_router.urls + task_router.urls + section_router.urls +requirements_router.urls

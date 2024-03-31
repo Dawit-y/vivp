@@ -149,7 +149,6 @@ class Requirement(models.Model):
         return f"Requirement for {self.post}"
 
 class Application(models.Model):
-
     class Status(models.TextChoices):
         PENDING = 'pending' , 'Pending'
         ACCEPTED = 'accepted', 'Accepted'
