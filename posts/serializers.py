@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from .models import *
+from accounts.serializers import ApplicantSerializer, OrganizationSerializer
 
 class PostSerializer(serializers.ModelSerializer):
     tasks_count = serializers.SerializerMethodField(method_name="get_tasks_count")
@@ -121,18 +122,12 @@ class RequirementSerializer(serializers.ModelSerializer):
             **validated_data
         )
         return requirement  
-class PostDetailSerializer(serializers.ModelSerializer):
-    tasks = TaskSerializer(many=True, read_only=True)
-    requirements = RequirementSerializer(many=True, read_only=True)
+class SimplePostSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer()
+
     class Meta:
         model = Post
-        fields = ['id', 'organization', 'title', 'description', 'image', 'type', 'level', 'category',"skills_gained", 'tasks', 'requirements', 'duration', 'updated', 'created', 'is_approved']
-    
-    def to_representation(self, instance: Post):
-        representation = super().to_representation(instance)
-        representation['tasks'] = TaskSerializer(instance.get_tasks(), many=True).data
-        representation['requirements'] = RequirementSerializer(instance.get_requirements(), many=True).data
-        return representation
+        fields = ['id', 'organization', 'title', 'type', 'level', 'category', 'duration']
     
 class ApplicationSerializer(serializers.ModelSerializer):
 
@@ -156,10 +151,11 @@ class ApplicationSerializer(serializers.ModelSerializer):
         return application
 
 class CertificateSerializer(serializers.ModelSerializer):
-
+    applicant = ApplicantSerializer()
+    post = SimplePostSerializer()
     class Meta:
         model = Certificate
-        fields = "__all__"
+        fields = ["applicant", "post", "pdf_file", "updated", "created"]
 
 class EvaluationSerializer(serializers.ModelSerializer):
 
