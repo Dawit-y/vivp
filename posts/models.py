@@ -172,18 +172,9 @@ class Application(models.Model):
 class Certificate(models.Model):
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.PROTECT, null=True)
-    default_text = models.TextField(blank=True)
+    pdf_file = models.FileField(upload_to='certificates/', null=True, blank=True )
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-
-    def generate_default_text(self):
-        default_text = f"Congratulations {self.applicant.first_name} for completing {self.post.title} provided by VIVP and {self.post.organization.name}."
-        return default_text
-
-    def save(self, *args, **kwargs):
-        if not self.default_text:
-            self.default_text = self.generate_default_text()
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Certificate'

@@ -42,6 +42,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
 
+    def get_full_name(self):
+        full_name = "%s %s" % (self.first_name, self.last_name)
+        return full_name.strip()
+
 
 class Applicant(User):
 
@@ -55,7 +59,7 @@ class Applicant(User):
     portfolio_link = models.URLField()
 
     def __str__(self) -> str:
-        return self.first_name
+        return self.get_full_name()
 
     def clean(self):
         if self.resume.size > 5 * 1024 * 1024:
