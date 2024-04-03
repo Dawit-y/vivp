@@ -1,3 +1,4 @@
+from typing import Iterable
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 
@@ -186,17 +187,21 @@ class Certificate(models.Model):
 
 class Evaluation(models.Model):
     comment = models.TextField(blank=True)
-    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, blank=True)
     grade = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True,
         help_text="Enter a numerical value out of one hundred to indicate how well the task is completed."
     )
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    submitted_task = models.ForeignKey(TaskSubmission, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Evaluation for {self.task.title}"
+        return f"Evaluation for {self.submitted_task.task.title}"
+    
+    def save(self, *args, **kwargs):
+        self.applicant = self.submitted_task.applicant
+        super(Evaluation, self).save(*args, **kwargs)
     
 
 class Assignment(models.Model):
