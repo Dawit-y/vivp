@@ -107,7 +107,7 @@ class Student(Applicant):
     department = models.CharField(max_length=100, help_text="Enter your department or major (if applicable), otherwise enter 'Freshman' or your school name", blank=True)
 
     def __str__(self):
-        return self.first_name
+        return self.get_full_name()
 
     def get_supervisor(self):
         try:
@@ -180,7 +180,7 @@ class UniversityCoordinator(User):
         verbose_name_plural = 'University Coordinators'
 
     def __str__(self):
-        return self.first_name
+        return self.get_full_name()
     
     def get_assignments(self):
         try:
@@ -206,7 +206,7 @@ class UniversitySupervisor(User):
         verbose_name_plural = 'University Supervisors'
 
     def __str__(self):
-        return self.first_name
+        return self.get_full_name()
 
     def get_students(self):
         try:
