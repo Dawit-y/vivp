@@ -1,8 +1,8 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from django_ckeditor_5.fields import CKEditor5Field
 
 from accounts.models import *
-
 
 
 class Post(models.Model):
@@ -38,9 +38,11 @@ class Post(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     skills_gained = models.TextField(help_text = "Type skills gained after the post comma separated e.g problem solving, ", null=True, blank=True)
     duration = models.CharField(max_length=100, help_text="Enter the duration of the post (e.g., '3 months')")
+    is_approved = models.BooleanField(default=False)
+    is_paid = models.BooleanField(default=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Enter a price for the Post if it is Paid.", validators=[MinValueValidator(0, "Invalid price for the post")])
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-    is_approved = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-updated', '-created']
@@ -67,6 +69,14 @@ class Post(models.Model):
         except Application.DoesNotExist:
             return None
 
+class PaidApplicant(models.Model):
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE) 
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.applicant} paid for post {self.post.title}"
 
 class Task(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)

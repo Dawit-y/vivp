@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,12 +44,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'django_ckeditor_5',
+    "corsheaders",
 
     "accounts",
     "posts",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -230,3 +235,16 @@ CKEDITOR_5_CONFIGS = {
         }
     }
 }
+
+STRIPE_SECRET_KEY = str(os.getenv('STRIPE_SECRET_KEY'))
+STRIPE_PUBLISHABLE_KEY = str(os.getenv('STRIPE_PUBLISHABLE_KEY'))
+STRIPE_WEBHOOK_SECRET = str(os.getenv("STRIPE_WEBHOOK_SECRET"))
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+
+FRONTEND_SUBSCRIPTION_SUCCESS_URL = "http://localhost:5173/success/"
+FRONTEND_SUBSCRIPTION_CANCEL_URL = "http://localhost:5173/cancel/"
