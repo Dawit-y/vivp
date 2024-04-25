@@ -2,10 +2,11 @@ from django.urls import path
 
 from rest_framework_nested import routers
 from . import views
+from .web_hook import Webhook
 
 router = routers.DefaultRouter()
 
-router.register("posts", views.PostViewSet)
+router.register("posts", views.PostViewSet, basename="posts")
 router.register("tasks", views.TaskViewSet)
 router.register("applications",views.ApplicationViewSet)
 router.register("certificates",views.CertificateViewSet)
@@ -23,4 +24,8 @@ task_router.register('tasks', views.PostTaskViewSet, basename="post-task")
 section_router = routers.NestedDefaultRouter(router, 'tasks', lookup='task')
 section_router.register('sections', views.TaskSectionsViewSet, basename="task-section")
 
-urlpatterns =  router.urls + applications_router.urls + task_router.urls + section_router.urls +requirements_router.urls
+urlpatterns = [
+    path('payment/', views.ProcessPayment.as_view(), name='payment'),
+    path("webhook/", Webhook.as_view(), name="webhook")
+    
+    ] + router.urls + applications_router.urls + task_router.urls + section_router.urls + requirements_router.urls

@@ -1,6 +1,7 @@
-from django.shortcuts import render
+import math
+
 from django.core.files.storage import default_storage
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.core.files import File
 
@@ -11,13 +12,25 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from accounts.permissions import *
 from .models import *
 from .serializers import *
+from .permissions import *
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+import stripe
+from rest_framework import status
+from django.conf import settings
 
 class PostViewSet(ModelViewSet):
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [PostPermission]
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Post.objects.all()   
+        return Post.objects.filter(is_approved=True)
     
 class PostApplicationsViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
@@ -28,13 +41,14 @@ class PostApplicationsViewSet(ModelViewSet):
 
 class PostTaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
+    permission_classes = [IsSuperUser | HasApplicantPaid]
 
     def get_queryset(self):
         post_pk = self.kwargs.get("post_pk")
         return Task.objects.filter(post__id=post_pk)
     def get_serializer_context(self, *args, **kwargs):
         post_pk=self.kwargs.get("post_pk")
-        return {'post_pk':post_pk }       
+        return {'post_pk':post_pk, 'request': self.request }       
 
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
@@ -42,6 +56,7 @@ class TaskViewSet(ModelViewSet):
 
 class TaskSectionsViewSet(ModelViewSet):
     serializer_class = TaskSectionSerializer
+
     def get_queryset(self):
         task_pk = self.kwargs.get("task_pk")
         return TaskSection.objects.filter(task__id=task_pk)
@@ -77,7 +92,10 @@ class CertificateViewSet(ModelViewSet):
         if certificate.pdf_file:
             return Response({"error" : "Certificate already created"}, status=403)
 
-        template = get_template('certificate_template.html')
+        if certificate.post.is_paid:
+            template = get_template('premium_certificate_template.html')
+        else:
+            template = get_template('certificate_template.html') 
         context = {'certificate': certificate_serializer.data}
 
         html = template.render(context)
@@ -87,8 +105,8 @@ class CertificateViewSet(ModelViewSet):
 
         if not pdf.err:
             response = HttpResponse(result.getvalue(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{certificate.applicant.first_name}_certificate.pdf"'
-            certificate.pdf_file.save(f'{certificate.applicant.first_name}_certificate.pdf', File(result), save=True)
+            response['Content-Disposition'] = f'attachment; filename="{certificate.applicant.get_full_name()}_certificate.pdf"'
+            certificate.pdf_file.save(f'{certificate.applicant.get_full_name()}_certificate.pdf', File(result), save=True)
             return response
 
         return Response({'error': 'Error generating PDF'}, status=500)
@@ -115,3 +133,49 @@ class PostRequirementsViewSet(ModelViewSet):
         post_pk =  self.kwargs.get('post_pk')
         return {'post_pk':post_pk}
 
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+class ProcessPayment(APIView):
+    def post(self, request):
+        post_id = request.POST.get("post")
+        post_obj = Post.objects.get(id=post_id)
+        unit_amount = int(math.ceil(post_obj.price * 100))
+
+        products = stripe.Product.list()
+        product = None
+        for p in products:
+            if p.name == post_obj.title:
+                product = p
+                break
+
+        if product:
+            product_id = product.id
+        else:
+            product = stripe.Product.create(
+                name=post_obj.title,
+                description=post_obj.description
+            )
+            product_id = product.id
+
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                line_items=[
+                    {
+                        "price_data": {
+                            "unit_amount": unit_amount,
+                            "currency": "usd",
+                            "product": f"{product_id}"
+                        },
+                        'quantity': 1
+                    }
+                ],
+                mode='payment',
+                success_url=settings.FRONTEND_SUBSCRIPTION_SUCCESS_URL + "?session_id={CHECKOUT_SESSION_ID}",
+                cancel_url=settings.FRONTEND_SUBSCRIPTION_CANCEL_URL,
+                metadata={
+                    'post_id': str(post_obj.id) 
+                }
+            )
+            return JsonResponse({'url': checkout_session.url}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)

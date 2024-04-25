@@ -56,13 +56,12 @@ class TaskSerializer(serializers.ModelSerializer):
  
     def get_status(self, obj: Task):
         request = self.context.get('request')
-        
-        if not request or not request.user.is_authenticated:
+        if not request.user.is_authenticated:
             return "Unauthenticated User"
         
         user = request.user
         
-        if not hasattr(user, 'applicant'):
+        if not hasattr(user, 'applicant') or not request.user.is_superuser:
             return "Unauthorized Access"
         
         applicant: Applicant = user.applicant
