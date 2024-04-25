@@ -23,7 +23,7 @@ class CustomUserAdmin(UserAdmin):
     model = User
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'phone_number')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
@@ -32,19 +32,20 @@ class CustomUserAdmin(UserAdmin):
                 None,
                 {
                     'classes': ('wide',),
-                    'fields': ('email', 'first_name', 'last_name', 'password1', 'password2'),
+                    'fields': ('email', 'first_name', 'last_name', 'password1', 'password2', "phone_number"),
                 },
             ),
         )
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
-    list_display = ['email', 'first_name', 'last_name', 'is_staff']
+    list_display = ['email', 'first_name', 'last_name', "phone_number",'is_staff']
     ordering = ['email']
     exclude = ['username']
 
     def save_model(self, request, obj, form, change):
-
-        obj.set_password(form.cleaned_data["password1"])
+        if form.is_valid():
+            if 'password1' in form.cleaned_data:
+                obj.set_password(form.cleaned_data["password1"])
         super().save_model(request, obj, form, change)
 
 admin.site.register(User, CustomUserAdmin)
