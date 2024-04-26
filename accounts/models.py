@@ -45,6 +45,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_full_name(self):
         full_name = "%s %s" % (self.first_name, self.last_name)
         return full_name.strip()
+    @property
+    def role(self):
+        if self.is_staff:
+            return "system_coordinator"
+        if hasattr(self, "applicant"):
+            if hasattr(self.applicant, "student"):
+                return "student"
+            return "applicant"
+        if hasattr(self, "supervisor"):
+            return "organization"
+        if hasattr(self, "universitycoordinator"):
+            return "university_coordinator"
+        if hasattr(self, "universitysupervisor"):
+            return "university_supervisor"
+        return "unknown"
 
 
 class Applicant(User):
