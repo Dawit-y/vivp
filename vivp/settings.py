@@ -42,12 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'django_ckeditor_5',
     "corsheaders",
     "djoser",
+    'drf_yasg',
 
     "accounts",
     "posts",

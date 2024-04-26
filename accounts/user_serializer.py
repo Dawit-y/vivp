@@ -9,14 +9,33 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         fields = ['id', 'username','password', 'email', 'first_name', 'last_name', "is_staff"]
     
 class UserSerializer(BaseUserSerializer):
+    role = serializers.SerializerMethodField(method_name="get_role")
     class Meta(BaseUserSerializer.Meta):
-        fields = ['id', 'email', 'first_name', 'last_name']
+        fields = ['id', 'email', 'first_name', 'last_name', "role"]
+        ref_name = "user_serializer"
+
+    def get_role(self, obj):
+        if obj.is_staff:
+            return "system_coordinator"
+        if hasattr(obj, "applicant"):
+            if hasattr(obj.applicant, "student"):
+                return "student"
+            return "applicant"
+        if hasattr(obj, "supervisor"):
+            return "organization"
+        if hasattr(obj, "universitycoordinator"):
+            return "university_coordinator"
+        if hasattr(obj, "universitysupervisor"):
+            return "university_supervisor"
+        return "unknown"
+
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        token['role'] = user.role
         token["email"] = user.email
+        serializer = UserSerializer(user)
+        token["role"] = serializer.data["role"]
         return token

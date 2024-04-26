@@ -25,7 +25,7 @@ section_router = routers.NestedDefaultRouter(router, 'tasks', lookup='task')
 section_router.register('sections', views.TaskSectionsViewSet, basename="task-section")
 
 urlpatterns = [
-    path('payment/', views.ProcessPayment.as_view(), name='payment'),
+    path('payment/<int:post_id>/', views.ProcessPayment.as_view(), name='payment'),
     path("webhook/", Webhook.as_view(), name="webhook")
     
     ] + router.urls + applications_router.urls + task_router.urls + section_router.urls + requirements_router.urls
