@@ -4,12 +4,16 @@ from django.core.files.storage import default_storage
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.core.files import File
+from django.conf import settings
 
+import stripe
 from xhtml2pdf import pisa
 from io import BytesIO
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from accounts.permissions import *
@@ -17,11 +21,6 @@ from .models import *
 from .serializers import *
 from .permissions import *
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-import stripe
-from rest_framework import status
-from django.conf import settings
 
 class PostViewSet(ModelViewSet):
     serializer_class = PostSerializer
@@ -34,7 +33,7 @@ class PostViewSet(ModelViewSet):
     
 class PostApplicationsViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
-
+    http_method_names = SAFE_METHODS
     def get_queryset(self):
         post_pk = self.kwargs.get("post_pk")
         return Application.objects.filter(post__id=post_pk)
@@ -74,20 +73,10 @@ class CertificateViewSet(ModelViewSet):
     serializer_class = CertificateSerializer
     filterset_fields = ["applicant", "post"]
 
-    @action(detail=True, methods=['post', "delete"], url_path="generate-pdf")
-    def generate_pdf(self, request, pk=None):
+    @action(detail=True, methods=['post'], url_path="generate-certificate")
+    def generate_certificate(self, request, pk=None):
         certificate = self.get_object()
         certificate_serializer = self.get_serializer(certificate)
-
-        if request.method == 'DELETE':
-            # Delete the PDF file associated with the certificate
-            if certificate.pdf_file:
-                pdf_file_path = certificate.pdf_file.path
-                certificate.pdf_file.delete()
-                default_storage.delete(pdf_file_path)
-                return Response({"message": "Certificate file deleted successfully"})
-            else:
-                return Response({"error": "No Certificate file exists for this certificate"}, status=404)
 
         if certificate.pdf_file:
             return Response({"error" : "Certificate already created"}, status=403)
@@ -111,6 +100,18 @@ class CertificateViewSet(ModelViewSet):
 
         return Response({'error': 'Error generating PDF'}, status=500)
     
+    @action(detail=True, methods=["delete"], url_path="delete-certificate")
+    def delete_certificate(self, request, pk=None):
+        certificate = self.get_object()
+
+        if certificate.pdf_file:
+            pdf_file_path = certificate.pdf_file.path
+            certificate.pdf_file.delete()
+            default_storage.delete(pdf_file_path)
+            return Response({"message": "Certificate file deleted successfully"})
+        else:
+            return Response({"error": "No Certificate file exists for this certificate"}, status=404)
+    
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         pdf_file = instance.pdf_file
@@ -123,7 +124,8 @@ class CertificateViewSet(ModelViewSet):
 class EvaluationViewSet(ModelViewSet):
     queryset = Evaluation.objects.all()
     serializer_class = EvaluationSerializer
-    filterset_fields = ["applicant", "task"]
+    http_method_names = SAFE_METHODS
+    filterset_fields = ["applicant"]
 
 class PostRequirementsViewSet(ModelViewSet):
     queryset= Requirement.objects.all()
@@ -136,9 +138,12 @@ class PostRequirementsViewSet(ModelViewSet):
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class ProcessPayment(APIView):
-    def post(self, request):
-        post_id = request.POST.get("post")
-        post_obj = Post.objects.get(id=post_id)
+    def post(self, request, post_id):
+        try:
+            post_obj = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post not found."}, status=404)
+        
         unit_amount = int(math.ceil(post_obj.price * 100))
 
         products = stripe.Product.list()
