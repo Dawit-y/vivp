@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import SAFE_METHODS
 
+from .user_serializer import UserCreateSerializer, UserSerializer
 from .serializers import *
 from .permissions import *
 from posts.serializers import *
@@ -26,6 +28,21 @@ class UniversitySupervisorViewSet(ModelViewSet):
     queryset = UniversitySupervisor.objects.all()
     serializer_class = UvSupervisorSerializer
 
+class SystemCoordinatorViewSet(ModelViewSet):
+
+    def get_queryset(self):
+        return User.objects.filter(is_staff=True, is_superuser=False)
+    
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return UserCreateSerializer
+        return UserSerializer
+    
+    def perform_create(self, serializer):
+        serializer.validated_data['is_staff'] = True 
+        instance = serializer.save() 
+        return instance
+    
 class ApplicantApplicationsViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
 
@@ -35,7 +52,7 @@ class ApplicantApplicationsViewSet(ModelViewSet):
     
 class ApplicantCertificatesViewSet(ModelViewSet):
     serializer_class = CertificateSerializer
-    http_method_names = ["get", "head"]
+    http_method_names = ['get', 'head', 'options']
 
     def get_queryset(self):
         applicant_pk = self.kwargs.get("applicant_pk")
@@ -43,16 +60,24 @@ class ApplicantCertificatesViewSet(ModelViewSet):
     
 class ApplicantNotificationsViewSet(ModelViewSet):
     serializer_class = NotificationsSerializer
-    http_method_names = ["get", "head"]
-    permission_classes = [IsApplicant]
+    http_method_names = ['get', 'head', 'options']
+    permission_classes = [IsApplicant, IsSuperUser]
 
     def get_queryset(self):
         applicant_pk = self.kwargs.get("applicant_pk")
         return Notification.objects.filter(notify_to__id=applicant_pk)
     
+class ApplicantSubmittedTasks(ModelViewSet):
+    serializer_class = TaskSubmissionSerializer
+    http_method_names = ['get', 'head', 'options']
+
+    def get_queryset(self):
+        applicant_pk = self.kwargs.get("applicant_pk")
+        return TaskSubmission.objects.filter(applicant__id=applicant_pk)
+     
 class ApplicantEvaluationViewSet(ModelViewSet):
     serializer_class = EvaluationSerializer
-    http_method_names = ["get", "head"]
+    http_method_names = ['get', 'head', 'options']
 
     def get_queryset(self):
         applicant_pk = self.kwargs.get("applicant_pk")
@@ -64,8 +89,10 @@ class OrganizationPostViewSet(ModelViewSet):
     def get_queryset(self):
         organization_pk = self.kwargs.get("organization_pk")
         return Post.objects.filter(organization_id=organization_pk)
+    
 class OrganizationSubmittedTasksView(ModelViewSet):
     serializer_class = TaskSubmissionSerializer
+    http_method_names = ['get', 'head', 'options']
     
     def get_queryset(self):
         organization_pk = self.kwargs.get("organization_pk")
@@ -74,13 +101,14 @@ class OrganizationSubmittedTasksView(ModelViewSet):
         return submitted_tasks
 class OrganizationApplicationViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
+    http_method_names = ['get', 'head', 'options']
 
     def get_queryset(self):
         organization_pk = self.kwargs.get("organization_pk")
         posts = Post.objects.filter(organization_id=organization_pk)
-
         applications = Application.objects.filter(post__in = posts)
         return applications
+    
 class UvCoordinatorassignment(ModelViewSet):
     serializer_class = AssignmentSerializer
 
@@ -99,8 +127,32 @@ class EvaluateViewSet(ModelViewSet):
     def get_queryset(self):
         submitted_pk = self.kwargs.get("submitted_tasks_pk")
         task_submission = get_object_or_404(TaskSubmission, id=submitted_pk)
-        return Evaluation.objects.filter(task = task_submission.task)
+        return Evaluation.objects.filter(submitted_task=task_submission)
     
     def get_serializer_context(self, *args, **kwargs):
         submitted_pk=self.kwargs.get("submitted_tasks_pk")
         return {'submitted_pk':submitted_pk }       
+
+class SystemCoordinatorPosts(ModelViewSet):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        system_coordinator_pk = self.kwargs.get("systemCoordinators_pk")
+        return Post.objects.filter(system_coordinator_id=system_coordinator_pk)
+    
+    def perform_create(self, serializer):
+        system_coordinator_pk = self.kwargs.get("systemCoordinators_pk")
+        serializer.validated_data['system_coordinator'] = system_coordinator_pk
+        instance = serializer.save()
+        return instance
+    
+class SystemCoordinatorApplications(ModelViewSet):
+    serializer_class = ApplicationSerializer
+    http_method_names = ['get', 'head', 'options']
+
+    def get_queryset(self):
+        system_coordinator_pk = self.kwargs.get("systemCoordinators_pk")
+        posts = Post.objects.filter(system_coordinator_id=system_coordinator_pk)
+        applications = Application.objects.filter(post__in = posts)
+        return applications
+    

@@ -5,6 +5,7 @@ from .models import *
 from accounts.serializers import ApplicantSerializer, OrganizationSerializer
 
 class PostSerializer(serializers.ModelSerializer):
+    system_coordinator = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_staff=True, is_superuser=False))
     tasks_count = serializers.SerializerMethodField(method_name="get_tasks_count")
     status = serializers.SerializerMethodField(method_name="get_status")
     class Meta:
@@ -45,6 +46,16 @@ class PostSerializer(serializers.ModelSerializer):
         representation['tasks_count'] = self.get_tasks_count(instance)
         representation["status"] = self.get_status(instance)
         return representation
+    
+    def validate(self, attrs):
+        system_coordinator = attrs.get('system_coordinator')
+        organization = attrs.get('organization')
+
+        if system_coordinator is None and organization is None:
+            raise serializers.ValidationError("Either system coordinator or organization must be set.")
+        elif system_coordinator is not None and organization is not None:
+            raise serializers.ValidationError("Both system coordinator and organization cannot be set simultaneously.")
+        return attrs
 
 class TaskSerializer(serializers.ModelSerializer):
     sections_count = serializers.SerializerMethodField(method_name="get_task_section_count")
@@ -162,11 +173,18 @@ class EvaluationSerializer(serializers.ModelSerializer):
         model = Evaluation
         fields = ['comment','grade','updated','created']
 
+    def validate(self, data):
+        submitted_pk = self.context.get("submitted_pk")
+        existing_evaluation = Evaluation.objects.filter(submitted_task_id=submitted_pk).exists()
+        if existing_evaluation:
+            raise serializers.ValidationError("An evaluation already exists for this submitted task.", code="unique")
+        return data
+
     def create(self,validated_data):
         submitted_pk = self.context.get('submitted_pk')
         task_submission = get_object_or_404(TaskSubmission, id=submitted_pk)
         evaluation = Evaluation.objects.create(
-            task=task_submission.task,
+            submitted_task=task_submission,
             applicant=task_submission.applicant,
             **validated_data
         )
