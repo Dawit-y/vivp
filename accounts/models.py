@@ -37,6 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField( _('date joined'),default=timezone.now,)
     phone_regex = RegexValidator(regex=r'^\+251\d{9}$', message="Phone number must be entered in the format: '+251xxxxxxxxx'.")
     phone_number = models.CharField(validators=[phone_regex], max_length=13, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     objects = UserManager()
 
@@ -137,7 +138,7 @@ class Organization(models.Model):
     logo = models.ImageField(upload_to='organization_logos/', blank=True, help_text='Organization logo')
     linkedin_url = models.URLField(blank=True, null=True, help_text='LinkedIn profile URL')
     registration_date = models.DateTimeField(auto_now_add=True)
-    supervisor = models.OneToOneField(User, on_delete = models.PROTECT)
+    supervisor = models.OneToOneField(User, on_delete = models.CASCADE)
 
     class Meta:
         verbose_name = 'Organization'
@@ -196,7 +197,6 @@ class UniversityCoordinator(User):
 
 class UniversitySupervisor(User):
     coordinator = models.ForeignKey(UniversityCoordinator, on_delete=models.CASCADE)
-    university = models.CharField(max_length=100, choices=UNIVERSITY_CHOICES, help_text="Select the university associated with the supervisor", blank=False, null=False)
     department = models.CharField(max_length=100, help_text="Enter the department where the supervisor is working")
     specialization = models.CharField(max_length=100, help_text="Specify the supervisor's area of expertise (e.g., Machine Learning, Data Science)")
 
