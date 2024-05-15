@@ -6,7 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserCreateSerializer(BaseUserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
-        fields = ['id','password', 'email', 'first_name', 'last_name','phone_number' ,"is_staff"]
+        fields = ['id','password', 'email', 'first_name', 'last_name','phone_number',"avatar", "is_staff"]
     
 class UserSerializer(BaseUserSerializer):
     role = serializers.SerializerMethodField(method_name="get_role")

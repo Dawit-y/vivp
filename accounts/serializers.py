@@ -41,10 +41,12 @@ class StudentSerializer(serializers.ModelSerializer):
     
 class OrganizationSerializer(serializers.ModelSerializer):
     supervisor = UserCreateSerializer()
-    
+    organization_email = serializers.EmailField(source="email")
+    organization_phone_number = serializers.CharField(source="phone_number")
+
     class Meta:
         model = Organization
-        fields = ["name", "email", "phone_number", "organization_type", "website", "location_city", "location_state", "description", "logo", "linkedin_url", "registration_date", "supervisor"]
+        fields = ["name", "organization_email", "organization_phone_number", "organization_type", "website", "location_city", "location_state", "description", "logo", "linkedin_url", "registration_date", "supervisor"]
         extra_kwargs = {
             'registration_date' : {"read_only": True}
         }
