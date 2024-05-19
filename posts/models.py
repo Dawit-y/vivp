@@ -142,6 +142,8 @@ class TaskSubmission(models.Model):
     submited_url = models.URLField(null=True, blank=True, help_text="Submit solution's url")
     submited_file = models.FileField(upload_to="submissions/", null=True, blank=True, help_text="Submit solution's file")
     submitted_text = CKEditor5Field(null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"submission for task {self.task} by {self.applicant}"

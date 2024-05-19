@@ -50,10 +50,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Applicant(User):
 
     GENDER_CHOICES = [
-        ("M", "Male"),
-        ("F", "Female")
+        ("male", "Male"),
+        ("female", "Female")
     ]
-    gender = models.CharField(max_length = 1,choices=GENDER_CHOICES)
+    gender = models.CharField(max_length = 6,choices=GENDER_CHOICES)
     age = models.PositiveIntegerField(validators=[MinValueValidator(13), MaxValueValidator(120)])
     resume = models.FileField(upload_to='resumes/')
     portfolio_link = models.URLField()

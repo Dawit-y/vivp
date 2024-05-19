@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from accounts.simple_serializer import *
+
 from .models import *
 from accounts.serializers import ApplicantSerializer, OrganizationSerializer
 
@@ -140,7 +142,8 @@ class SimplePostSerializer(serializers.ModelSerializer):
         fields = ['id', 'organization', 'title', 'type', 'level', 'category', 'duration']
 
 class ApplicationSerializer(serializers.ModelSerializer):
-
+    applicant = SimpleApplicantSerializer()
+    post = SimplerPostSerializer()
     class Meta:
         model = Application
         fields = "__all__"
@@ -192,6 +195,7 @@ class EvaluationSerializer(serializers.ModelSerializer):
         return evaluation
     
 class TaskSubmissionSerializer(serializers.ModelSerializer):
+    task = SimpleTaskSerializer()
     class Meta:
         model = TaskSubmission
         fields ='__all__'

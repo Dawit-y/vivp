@@ -15,13 +15,15 @@ class UserSerializer(BaseUserSerializer):
         ref_name = "user_serializer"
 
     def get_role(self, obj):
+        if obj.is_superuser:
+            return "admin"
         if obj.is_staff:
             return "system_coordinator"
         if hasattr(obj, "applicant"):
             if hasattr(obj.applicant, "student"):
                 return "student"
             return "applicant"
-        if hasattr(obj, "supervisor"):
+        if hasattr(obj, "organization"):
             return "organization"
         if hasattr(obj, "universitycoordinator"):
             return "university_coordinator"
@@ -38,4 +40,20 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["email"] = user.email
         serializer = UserSerializer(user)
         token["role"] = serializer.data["role"]
+
+        if user.is_superuser:
+            token["admin_id"] = user.id
+        if user.is_staff:
+            token["system_coordinator_id"] = user.id
+        if hasattr(user, "applicant"):
+            if hasattr(user.applicant, "student"):
+                token["student_id"] = user.applicant.student.id
+            else:
+                token["applicant_id"] = user.applicant.id
+        if hasattr(user, "organization"):
+            token["organization_id"] = user.organization.id
+        if hasattr(user, "universitycoordinator"):
+            token["university_coordinator_id"] = user.universitycoordinator.id
+        if hasattr(user, "universitysupervisor"):
+            token["university_supervisor_id"] = user.universitysupervisor.id
         return token

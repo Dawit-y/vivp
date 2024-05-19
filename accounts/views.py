@@ -73,6 +73,11 @@ class ApplicantSubmittedTasks(ModelViewSet):
 
     def get_queryset(self):
         applicant_pk = self.kwargs.get("applicant_pk")
+        post_id = self.request.query_params.get('post_id')
+        if post_id:
+            post = get_object_or_404(Post, id=post_id)
+            tasks = post.get_tasks()
+            return TaskSubmission.objects.filter(applicant__id=applicant_pk, task__in=tasks)
         return TaskSubmission.objects.filter(applicant__id=applicant_pk)
      
 class ApplicantEvaluationViewSet(ModelViewSet):
