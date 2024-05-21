@@ -29,8 +29,8 @@ class Post(models.Model):
         ('Other', 'Other'),
     ]
 
-    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
-    system_coordinator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
+    system_coordinator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=255, help_text="Enter the title of the post")
     description = models.TextField(help_text="Enter a detailed description of the post")
     image = models.ImageField(upload_to='post_images/', blank=True, null=True, help_text="Upload an image related to the post (optional)")

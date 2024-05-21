@@ -106,7 +106,7 @@ class OrganizationSubmittedTasksView(ModelViewSet):
         return submitted_tasks
 class OrganizationApplicationViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
-    http_method_names = ['get', 'head', 'options']
+    http_method_names = ['get', 'head', 'options', 'put', 'patch']
 
     def get_queryset(self):
         organization_pk = self.kwargs.get("organization_pk")

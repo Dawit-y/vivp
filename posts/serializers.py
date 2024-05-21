@@ -196,6 +196,8 @@ class EvaluationSerializer(serializers.ModelSerializer):
     
 class TaskSubmissionSerializer(serializers.ModelSerializer):
     task = SimpleTaskSerializer()
+    applicant = SimpleApplicantSerializer()
+    
     class Meta:
         model = TaskSubmission
         fields ='__all__'

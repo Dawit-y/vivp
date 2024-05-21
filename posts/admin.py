@@ -1,7 +1,11 @@
 from django.contrib import admin
 from .models import *
+from .forms import PostAdminForm
 
-admin.site.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    form = PostAdminForm
+
+admin.site.register(Post, PostAdmin)
 admin.site.register(Task)
 admin.site.register(TaskSubmission)
 admin.site.register(TaskSection)

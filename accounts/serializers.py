@@ -7,7 +7,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Applicant
-        fields = ["id", "first_name", "last_name", "email", "password", "age", "gender", "phone_number", "avatar","resume", "portfolio_link", "date_joined"]
+        fields = ["id", "first_name", "last_name", "email", "password", "age", "gender", "phone_number", "avatar","resume", "portfolio_link", "date_joined", "is_active"]
         extra_kwargs = {
             'password' : {'write_only' : True},
             'date_joined' : {"read_only": True}
