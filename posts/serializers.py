@@ -7,7 +7,7 @@ from .models import *
 from accounts.serializers import ApplicantSerializer, OrganizationSerializer
 
 class PostSerializer(serializers.ModelSerializer):
-    system_coordinator = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_staff=True, is_superuser=False))
+    system_coordinator = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_staff=True, is_superuser=False), required=False, allow_null=True)
     tasks_count = serializers.SerializerMethodField(method_name="get_tasks_count")
     status = serializers.SerializerMethodField(method_name="get_status")
     class Meta:
@@ -53,10 +53,10 @@ class PostSerializer(serializers.ModelSerializer):
         system_coordinator = attrs.get('system_coordinator')
         organization = attrs.get('organization')
 
-        if system_coordinator is None and organization is None:
-            raise serializers.ValidationError("Either system coordinator or organization must be set.")
-        elif system_coordinator is not None and organization is not None:
-            raise serializers.ValidationError("Both system coordinator and organization cannot be set simultaneously.")
+        if organization and system_coordinator:
+            raise serializers.ValidationError('Only one of organization or system coordinator should be set.')
+        if not organization and not system_coordinator:
+            raise serializers.ValidationError('Either organization or system coordinator must be set.')
         return attrs
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -106,6 +106,12 @@ class TaskSerializer(serializers.ModelSerializer):
         )
         
         return task
+    
+class TaskOnlySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = "__all__"
+
 class TaskSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskSection
@@ -121,7 +127,6 @@ class TaskSectionSerializer(serializers.ModelSerializer):
         return task_section
     
 
-
 class RequirementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Requirement
@@ -134,6 +139,7 @@ class RequirementSerializer(serializers.ModelSerializer):
             **validated_data
         )
         return requirement  
+    
 class SimplePostSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer()
 

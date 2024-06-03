@@ -4,7 +4,6 @@ from django_ckeditor_5.fields import CKEditor5Field
 
 from accounts.models import *
 
-
 class Post(models.Model):
 
     TYPE_CHOICES = [
@@ -51,6 +50,12 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def clean(self):
+        if self.organization and self.system_coordinator:
+            raise ValidationError('Only one of self.organization or system coordinator should be set.')
+        if not self.organization and not self.system_coordinator:
+            raise ValidationError('Either organization or system coordinator must be set.')
 
     def get_tasks(self):
         try:
@@ -119,6 +124,7 @@ class TaskSection(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="section")
     title = models.CharField(max_length=250,choices=TITLE_CHOICES, ) 
     content = CKEditor5Field()
+    video = models.FileField(upload_to="videos", null=True, blank=True)
     is_file = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a file ? e.g txt, pdf, patch, doc")
     is_url = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a url for the solution ? e.g github link, google drive link")
     is_text = models.BooleanField(default=False, help_text="Do you want applicants to submit this task by writting their answer ?")

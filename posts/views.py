@@ -50,7 +50,7 @@ class PostTaskViewSet(ModelViewSet):
         return {'post_pk':post_pk, 'request': self.request }       
 
 class TaskViewSet(ModelViewSet):
-    serializer_class = TaskSerializer
+    serializer_class = TaskOnlySerializer
     queryset = Task.objects.all()
 
 class TaskSectionsViewSet(ModelViewSet):
