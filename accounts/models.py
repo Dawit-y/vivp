@@ -105,6 +105,7 @@ class Student(Applicant):
     university_id_number = models.CharField(max_length=100, help_text="Type your university ID", blank=False, null=False)
     batch = models.CharField(max_length=10, help_text="Enter your academic year or term (e.g., 3rd year)", blank=False, null=False)
     department = models.CharField(max_length=100, help_text="Enter your department or major (if applicable), otherwise enter 'Freshman' or your school name", blank=True)
+    document = models.FileField(upload_to="final_documents/", null=True, blank=True, help_text="Upload final document when the work is done")
 
     def __str__(self):
         return self.get_full_name()

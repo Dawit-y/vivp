@@ -231,3 +231,22 @@ class AssignmentSerializer(serializers.ModelSerializer):
         )
         return assignment
 
+class SupervisorCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupervisorComment
+        fields = '__all__'
+
+class SupervisorEvaluationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupervisorEvaluation
+        fields = '__all__'
+
+class SupervisorEvaluationListSerializer(serializers.ListSerializer):
+    child = SupervisorEvaluationSerializer()
+    allow_null = False
+    many = True
+
+    def create(self, validated_data):
+        evaluations = [SupervisorEvaluation(**item) for item in validated_data]
+        return SupervisorEvaluation.objects.bulk_create(evaluations)
+    

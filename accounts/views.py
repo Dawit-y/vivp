@@ -123,8 +123,36 @@ class UvCoordinatorassignment(ModelViewSet):
     
     def get_serializer_context(self, *args, **kwargs):
         UvCoordniators_pk=self.kwargs.get("UvCoordniators_pk")
-        return {'UvCoordniators_pk':UvCoordniators_pk }       
+        return {'UvCoordniators_pk':UvCoordniators_pk }    
+   
+class UvCoordinatorStudents(ModelViewSet):
+    serializer_class = SimpleApplicantSerializer
+    http_method_names = ['get', 'head', 'options']
 
+    def get_queryset(self):
+        UvCoordniators_pk = self.kwargs.get("UvCoordniators_pk")
+        uv_coordinator = get_object_or_404(UniversityCoordinator, id=UvCoordniators_pk)
+        return uv_coordinator.get_students()
+         
+
+class UvSupervisorStudents(ModelViewSet):
+    serializer_class = SimpleApplicantSerializer
+    http_method_names = ['get', 'head', 'options']
+
+    def get_queryset(self):
+        UvSupervisor_pk = self.kwargs.get("UvSupervisor_pk")
+        uv_supervisor = get_object_or_404(UniversitySupervisor, id=UvSupervisor_pk)
+        return uv_supervisor.get_students()
+    
+class SupervisorEvaluationViewSet(ModelViewSet):
+    queryset = SupervisorEvaluation.objects.all()
+    serializer_class = SupervisorEvaluationSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        if isinstance(kwargs.get('data', {}), list):
+            kwargs['many'] = True
+        return super(SupervisorEvaluationViewSet, self).get_serializer(*args, **kwargs)
+         
         
 class EvaluateViewSet(ModelViewSet):
     serializer_class = EvaluationSerializer

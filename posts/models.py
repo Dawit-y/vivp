@@ -204,13 +204,11 @@ class Certificate(models.Model):
 
 
 class Evaluation(models.Model):
-    comment = models.TextField(blank=True)
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, blank=True)
-    grade = models.DecimalField(
-        max_digits=5, decimal_places=2, null=True, blank=True,
-        help_text="Enter a numerical value out of one hundred to indicate how well the task is completed."
-    )
     submitted_task = models.ForeignKey(TaskSubmission, on_delete=models.CASCADE)
+    comment = models.TextField(blank=True)
+    skills_learned = models.TextField(blank=True)
+    proficiency_level = models.CharField(max_length=15)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -231,3 +229,36 @@ class Assignment(models.Model):
 
     def __str__(self):
         return f"student {self.student.first_name} assigned to supervisor {self.supervisor.first_name}"
+
+class SupervisorEvaluation(models.Model):
+    supervisor = models.ForeignKey(UniversitySupervisor, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
+    document_evaluation = models.DecimalField(max_digits=4, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(20)], help_text="Score out of 20")
+    presentation_evaluation = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(35)], help_text="Score out of 35")
+    firm_evaluation = models.DecimalField(max_digits=4, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(25)], help_text="Score out of 25")
+    supervisor_evaluation = models.DecimalField(max_digits=4, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(20)], help_text="Score out of 20")
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Supervisor Evaluation for {self.applicant}"
+
+    class Meta:
+        verbose_name = "Supervisor Evaluation"
+        verbose_name_plural = "Supervisor Evaluations"
+
+class SupervisorComment(models.Model):
+    supervisor = models.ForeignKey(UniversitySupervisor, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    comment = models.TextField(blank=True)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Supervisor comment for {self.applicant} on {self.post.title}"
+
+    class Meta:
+        verbose_name = "Supervisor Comment"
+        verbose_name_plural = "Supervisor Comments"
+

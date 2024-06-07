@@ -40,6 +40,15 @@ organization_application_router.register('applications', views.OrganizationAppli
 uvcoordinator_assign = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
 uvcoordinator_assign.register('assignments', views.UvCoordinatorassignment, basename="UvCoordniators_assignment")
 
+uvcoordinator_students = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
+uvcoordinator_students.register('students', views.UvCoordinatorStudents, basename="UvCoordniators_student")
+
+uvsupervisor_students = routers.NestedDefaultRouter(router,'UvSupervisors',lookup='UvSupervisors')
+uvsupervisor_students.register('students', views.UvSupervisorStudents, basename="UvSupervisors_student")
+
+uvsupervisor_evaluations = routers.NestedDefaultRouter(router,'UvSupervisors',lookup='UvSupervisors')
+uvsupervisor_evaluations.register('evaluations', views.SupervisorEvaluationViewSet, basename="UvSupervisors_evaluation")
+
 system_coordinator_posts_router = routers.NestedDefaultRouter(router, 'systemCoordinators', lookup='systemCoordinators')
 system_coordinator_posts_router.register("posts", views.SystemCoordinatorPosts, basename="system-coordinator-posts")
 
@@ -60,6 +69,9 @@ urlpatterns = (
     evaluate_router.urls+
     uvcoordinator_assign.urls+
     system_coordinator_posts_router.urls+
-    system_coordinator_applications_router.urls
+    system_coordinator_applications_router.urls+
+    uvcoordinator_students.urls+
+    uvsupervisor_students.urls+
+    uvsupervisor_evaluations.urls
     
 )
