@@ -124,7 +124,7 @@ class TaskSection(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="section")
     title = models.CharField(max_length=250,choices=TITLE_CHOICES, ) 
     content = CKEditor5Field()
-    video = models.FileField(upload_to="videos", null=True, blank=True)
+    video = models.URLField(null=True, blank=True, help_text="Add a video that explains the task, prefered if you did it from the organization")
     is_file = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a file ? e.g txt, pdf, patch, doc")
     is_url = models.BooleanField(default=False, help_text="Do you want applicants to submit this task as a url for the solution ? e.g github link, google drive link")
     is_text = models.BooleanField(default=False, help_text="Do you want applicants to submit this task by writting their answer ?")

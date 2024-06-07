@@ -15,6 +15,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 
 from accounts.permissions import *
 from .models import *
@@ -62,6 +63,22 @@ class TaskSectionsViewSet(ModelViewSet):
     def get_serializer_context(self, *args, **kwargs):
         task_pk=self.kwargs.get("task_pk")
         return {'task_pk':task_pk } 
+    
+    def create(self, request, *args, **kwargs):
+        is_many = isinstance(request.data, list)
+        task_pk = self.kwargs.get("task_pk")
+        context = self.get_serializer_context()
+        context['task_pk'] = task_pk
+        
+        serializer = self.get_serializer(data=request.data, context=context, many=is_many)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        serializer.save()
     
 class ApplicationViewSet(ModelViewSet):
     queryset = Application.objects.all()

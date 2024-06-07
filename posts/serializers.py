@@ -112,10 +112,18 @@ class TaskOnlySerializer(serializers.ModelSerializer):
         model = Task
         fields = "__all__"
 
+class TaskSectionListSerializer(serializers.ListSerializer):
+    def create(self, validated_data):
+        task_pk = self.context.get('task_pk')
+        task = get_object_or_404(Task, id=task_pk)
+        task_sections = [TaskSection(task=task, **item) for item in validated_data]
+        return TaskSection.objects.bulk_create(task_sections)
+
 class TaskSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskSection
-        fields = ['title','content','is_file','is_url','is_text','updated','created']
+        fields = ['title','content', 'video','is_file','is_url','is_text','updated','created']
+        list_serializer_class = TaskSectionListSerializer
     def create(self,validated_data):
         task_pk = self.context.get('task_pk')
         task = get_object_or_404(Task, id=task_pk)
@@ -125,7 +133,7 @@ class TaskSectionSerializer(serializers.ModelSerializer):
         )
         
         return task_section
-    
+      
 
 class RequirementSerializer(serializers.ModelSerializer):
     class Meta:
