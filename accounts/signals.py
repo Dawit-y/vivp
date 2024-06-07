@@ -32,7 +32,7 @@ def create_evaluation_result_notification(sender, instance: Evaluation, created 
     if created:
         Notification.objects.create(
             notify_to = instance.applicant, 
-            content = f"Your Submission for the task {instance.submitted_task.task.title} has been evaluated.\n Grade: {instance.grade} \n Comment: {instance.comment}", 
+            content = f"Your Submission for the task {instance.submitted_task.task.title} has been evaluated.\n Level: {instance.proficiency_level} \n Comment: {instance.comment}", 
             content_type = cn, 
             object_id = id )
         

@@ -188,7 +188,7 @@ class EvaluationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Evaluation
-        fields = ['comment','grade','updated','created']
+        fields = ['comment','proficiency_level','skills_learned','updated','created']
 
     def validate(self, data):
         submitted_pk = self.context.get("submitted_pk")
