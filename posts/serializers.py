@@ -9,44 +9,16 @@ from accounts.serializers import ApplicantSerializer, OrganizationSerializer
 class PostSerializer(serializers.ModelSerializer):
     system_coordinator = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_staff=True, is_superuser=False), required=False, allow_null=True)
     tasks_count = serializers.SerializerMethodField(method_name="get_tasks_count")
-    status = serializers.SerializerMethodField(method_name="get_status")
     class Meta:
         model = Post
         fields = "__all__"
 
     def get_tasks_count(self, post: Post):
         return post.get_tasks().count()
-    
-    def get_status(self, post: Post):
-        request = self.context.get('request')
-        
-        if not request or not request.user.is_authenticated:
-            return "Unauthenticated User"
-        
-        user = request.user
-        
-        if not hasattr(user, 'applicant'):
-            return "Unauthorized Access"
-        
-        applicant: Applicant = user.applicant
-        
-        try:
-            application = Application.objects.filter(applicant=applicant, post=post).latest('created')
-            if application.status == "accepted":
-                submitted_tasks = applicant.get_submitted_tasks()
-                if all(task.status == "Completed" for task in submitted_tasks):
-                    return "Completed"
-                else:
-                    return "Inprogress"
-            else:
-                return f"{application.status} application"
-        except Application.DoesNotExist:
-            return "Not Applied"
        
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['tasks_count'] = self.get_tasks_count(instance)
-        representation["status"] = self.get_status(instance)
         return representation
     
     def validate(self, attrs):
@@ -61,39 +33,16 @@ class PostSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     sections_count = serializers.SerializerMethodField(method_name="get_task_section_count")
-    status = serializers.SerializerMethodField(method_name="get_status")
 
     class Meta:
         model = Task
         fields = ['title','duration','created','updated','status','sections_count']
  
-    def get_status(self, obj: Task):
-        request = self.context.get('request')
-        if not request.user.is_authenticated:
-            return "Unauthenticated User"
-        
-        user = request.user
-        
-        if not hasattr(user, 'applicant') or not request.user.is_superuser:
-            return "Unauthorized Access"
-        
-        applicant: Applicant = user.applicant
-        
-        try:
-            task_submission = TaskSubmission.objects.get(
-                applicant=applicant,
-                task=obj
-            )
-            return task_submission.status
-        except TaskSubmission.DoesNotExist:
-            return "Inprogress"
-       
     def get_task_section_count(self, task: Task):
         return task.get_task_sections().count()
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['status'] = self.get_status(instance)
         representation["sections_count"] = self.get_task_section_count(instance)
         return representation
     
@@ -250,3 +199,14 @@ class SupervisorEvaluationListSerializer(serializers.ListSerializer):
         evaluations = [SupervisorEvaluation(**item) for item in validated_data]
         return SupervisorEvaluation.objects.bulk_create(evaluations)
     
+class PostStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PostStatus
+        fields = "__all__"
+
+class TaskStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TaskStatus
+        fields = "__all__"

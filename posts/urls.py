@@ -11,6 +11,8 @@ router.register("tasks", views.TaskViewSet)
 router.register("applications",views.ApplicationViewSet)
 router.register("certificates",views.CertificateViewSet)
 router.register("evaluations",views.EvaluationViewSet)
+router.register("poststatus", views.PostStatusViewSet)
+router.register("taskstatus", views.TaskStatusViewSet)
 
 applications_router = routers.NestedDefaultRouter(router, 'posts', lookup='post')
 applications_router.register('applications', views.PostApplicationsViewSet, basename="post-applicaton")

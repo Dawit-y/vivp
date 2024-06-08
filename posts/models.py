@@ -137,12 +137,6 @@ class TaskSection(models.Model):
     
 
 class TaskSubmission(models.Model):
-    class Status(models.TextChoices):
-        INPROGRESS = 'Inprogress' , 'Inprogress'
-        SUBMITTED = "Submitted", "Submitted"
-        COMPLETED = 'Completed', 'Completed'
-
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INPROGRESS)
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE, related_name="submission")
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="submission")
     submited_url = models.URLField(null=True, blank=True, help_text="Submit solution's url")
@@ -262,3 +256,41 @@ class SupervisorComment(models.Model):
         verbose_name = "Supervisor Comment"
         verbose_name_plural = "Supervisor Comments"
 
+
+class PostStatus(models.Model):
+    class Status(models.TextChoices):
+        INPROGRESS = 'Inprogress' , 'Inprogress'
+        COMPLETED = 'Completed', 'Completed'
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INPROGRESS)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Post status of {self.applicant} on {self.post.title}"
+
+    class Meta:
+        verbose_name = "Post Status"
+        verbose_name_plural = "Post Status"
+
+
+class TaskStatus(models.Model):
+    class Status(models.TextChoices):
+        INPROGRESS = 'Inprogress' , 'Inprogress'
+        SUBMITTED = "Submitted", "Submitted"
+        COMPLETED = 'Completed', 'Completed'
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INPROGRESS)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Task status of {self.applicant} on {self.task.title}"
+
+    class Meta:
+        verbose_name = "Task Status"
+        verbose_name_plural = "Task Status"

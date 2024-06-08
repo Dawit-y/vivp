@@ -86,6 +86,28 @@ class ApplicationViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer
     filterset_fields = ["applicant", "post", "status"]
 
+class EvaluationViewSet(ModelViewSet):
+    queryset = Evaluation.objects.all()
+    serializer_class = EvaluationSerializer
+    http_method_names = SAFE_METHODS
+    filterset_fields = ["applicant"]
+
+class PostRequirementsViewSet(ModelViewSet):
+    queryset= Requirement.objects.all()
+    serializer_class = RequirementSerializer
+
+    def get_serializer_context(self,*args,**kwargs):
+        post_pk =  self.kwargs.get('post_pk')
+        return {'post_pk':post_pk}
+    
+class PostStatusViewSet(ModelViewSet):
+    queryset = PostStatus.objects.all()
+    serializer_class = PostStatusSerializer
+
+class TaskStatusViewSet(ModelViewSet):
+    queryset = TaskStatus.objects.all()
+    serializer_class = TaskStatusSerializer
+
 class CertificateViewSet(ModelViewSet):
     queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
@@ -139,19 +161,6 @@ class CertificateViewSet(ModelViewSet):
                 default_storage.delete(file_path)
         return super().destroy(request, *args, **kwargs)
 
-class EvaluationViewSet(ModelViewSet):
-    queryset = Evaluation.objects.all()
-    serializer_class = EvaluationSerializer
-    http_method_names = SAFE_METHODS
-    filterset_fields = ["applicant"]
-
-class PostRequirementsViewSet(ModelViewSet):
-    queryset= Requirement.objects.all()
-    serializer_class = RequirementSerializer
-
-    def get_serializer_context(self,*args,**kwargs):
-        post_pk =  self.kwargs.get('post_pk')
-        return {'post_pk':post_pk}
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

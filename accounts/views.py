@@ -127,7 +127,7 @@ class UvCoordinatorassignment(ModelViewSet):
         return {'UvCoordniators_pk':UvCoordniators_pk }    
    
 class UvCoordinatorStudents(ModelViewSet):
-    serializer_class = SimpleApplicantSerializer
+    serializer_class = StudentSerializer
     http_method_names = ['get', 'head', 'options']
 
     def get_queryset(self):
@@ -137,7 +137,7 @@ class UvCoordinatorStudents(ModelViewSet):
          
 
 class UvSupervisorStudents(ModelViewSet):
-    serializer_class = SimpleApplicantSerializer
+    serializer_class = StudentSerializer
     http_method_names = ['get', 'head', 'options']
 
     def get_queryset(self):
