@@ -36,7 +36,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['title','duration','created','updated','status','sections_count']
+        fields = ['title','duration','created','updated','sections_count']
  
     def get_task_section_count(self, task: Task):
         return task.get_task_sections().count()
