@@ -90,6 +90,7 @@ class ApplicantEvaluationViewSet(ModelViewSet):
 
 class OrganizationPostViewSet(ModelViewSet):
     serializer_class = PostSerializer
+    filterset_fields = ["type"]
 
     def get_queryset(self):
         organization_pk = self.kwargs.get("organization_pk")

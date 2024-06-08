@@ -26,6 +26,7 @@ from .permissions import *
 class PostViewSet(ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = [PostPermission]
+    filterset_fields = ["type"]
 
     def get_queryset(self):
         if self.request.user.is_superuser:
