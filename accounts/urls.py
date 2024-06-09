@@ -41,7 +41,7 @@ organization_application_router = routers.NestedDefaultRouter(router,'organizati
 organization_application_router.register('applications', views.OrganizationApplicationViewSet, basename="organization_application")
 
 uvcoordinator_assign = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
-uvcoordinator_assign.register('assignments', views.UvCoordinatorassignment, basename="UvCoordniators_assignment")
+uvcoordinator_assign.register('assignments', views.UvCoordinatorAssignmentViewSet, basename="UvCoordniators_assignment")
 
 uvcoordinator_students = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
 uvcoordinator_students.register('students', views.UvCoordinatorStudents, basename="UvCoordniators_student")

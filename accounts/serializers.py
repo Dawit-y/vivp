@@ -27,7 +27,7 @@ class StudentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Student
-        fields = ["id", "first_name", "last_name", "email", "password", "age", "gender", "phone_number", "resume", "portfolio_link", "university", "university_id_number","batch","department", "date_joined", "post_id"]
+        fields = ["id", "first_name", "last_name", "email", "password", "age", "gender", "phone_number","avatar", "resume", "portfolio_link", "university", "university_id_number","batch","department", "date_joined", "post_id"]
         extra_kwargs = {
             'password' : {'write_only' : True},
             'date_joined' : {"read_only": True}
@@ -82,7 +82,7 @@ class UvCoordinatorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=UniversityCoordinator
-        fields = ["id", "first_name", "last_name", "email", "password", "phone_number","university", "legal_document", "date_joined"]
+        fields = ["id", "first_name", "last_name", "email", "password", "phone_number","university", "avatar","legal_document", "date_joined"]
         extra_kwargs = {
                 'password' : {'write_only' : True},
                 'date_joined' : {"read_only": True}
@@ -100,7 +100,7 @@ class UvSupervisorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=UniversitySupervisor
-        fields = ["id", "first_name", "last_name", "email", "password", "phone_number", "department", "coordinator", "specialization","date_joined"]
+        fields = ["id", "first_name", "last_name", "email", "password", "phone_number","avatar", "department", "coordinator", "specialization","date_joined"]
         extra_kwargs = {
             'password' : {'write_only' : True},
             'date_joined' : {"read_only": True}
