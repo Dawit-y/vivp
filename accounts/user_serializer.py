@@ -48,8 +48,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         if hasattr(user, "applicant"):
             if hasattr(user.applicant, "student"):
                 token["student_id"] = user.applicant.student.id
-            else:
-                token["applicant_id"] = user.applicant.id
+            token["applicant_id"] = user.applicant.id
         if hasattr(user, "organization"):
             token["organization_id"] = user.organization.id
         if hasattr(user, "universitycoordinator"):

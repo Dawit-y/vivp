@@ -22,3 +22,8 @@ class SimpleTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ["id", "title", "duration"]
+
+class SimpleOrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ["id", "name", "email", "phone_number"]

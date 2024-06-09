@@ -9,6 +9,7 @@ from accounts.serializers import ApplicantSerializer, OrganizationSerializer
 class PostSerializer(serializers.ModelSerializer):
     system_coordinator = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_staff=True, is_superuser=False), required=False, allow_null=True)
     tasks_count = serializers.SerializerMethodField(method_name="get_tasks_count")
+    organization = SimpleOrganizationSerializer()
     class Meta:
         model = Post
         fields = "__all__"

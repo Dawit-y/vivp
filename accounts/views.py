@@ -50,6 +50,14 @@ class ApplicantApplicationsViewSet(ModelViewSet):
         applicant_pk = self.kwargs.get("applicant_pk")
         return Application.objects.filter(applicant__id=applicant_pk)
     
+class ApplicantAcceptedPostsViewSet(ModelViewSet):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        applicant_pk = self.kwargs.get("applicant_pk")
+        accepted_applications = Application.objects.select_related("post").filter(applicant=applicant_pk, status = "accepted")
+        return [app.post for app in accepted_applications]
+    
 class ApplicantCertificatesViewSet(ModelViewSet):
     serializer_class = CertificateSerializer
     http_method_names = ['get', 'head', 'options']
