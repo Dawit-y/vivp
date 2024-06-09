@@ -141,7 +141,7 @@ class UvSupervisorStudents(ModelViewSet):
     http_method_names = ['get', 'head', 'options']
 
     def get_queryset(self):
-        UvSupervisor_pk = self.kwargs.get("UvSupervisor_pk")
+        UvSupervisor_pk = self.kwargs.get("UvSupervisors_pk")
         uv_supervisor = get_object_or_404(UniversitySupervisor, id=UvSupervisor_pk)
         return uv_supervisor.get_students()
     
