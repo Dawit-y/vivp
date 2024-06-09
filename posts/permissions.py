@@ -23,6 +23,8 @@ class PostPermission(BasePermission):
             return True
         if hasattr(request.user, "organization"):
             return True
+        if request.user.is_staff:
+            return True
         if request.method in SAFE_METHODS:
             return True
         return False

@@ -103,10 +103,12 @@ class PostRequirementsViewSet(ModelViewSet):
 class PostStatusViewSet(ModelViewSet):
     queryset = PostStatus.objects.all()
     serializer_class = PostStatusSerializer
+    filterset_fields = ["applicant", "post"]
 
 class TaskStatusViewSet(ModelViewSet):
     queryset = TaskStatus.objects.all()
     serializer_class = TaskStatusSerializer
+    filterset_fields = ["applicant", "task"]
 
 class CertificateViewSet(ModelViewSet):
     queryset = Certificate.objects.all()

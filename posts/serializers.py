@@ -33,17 +33,22 @@ class PostSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     sections_count = serializers.SerializerMethodField(method_name="get_task_section_count")
+    post_id = serializers.SerializerMethodField(method_name="get_post_id")
 
     class Meta:
         model = Task
-        fields = ['title','duration','created','updated','sections_count']
+        fields = ['title','duration','sections_count','post_id','created','updated',]
  
     def get_task_section_count(self, task: Task):
         return task.get_task_sections().count()
     
+    def get_post_id(self, task: Task):
+        return task.post.id
+    
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation["sections_count"] = self.get_task_section_count(instance)
+        representation["post_id"] = self.get_post_id(instance)
         return representation
     
     def create(self,validated_data):
@@ -158,12 +163,31 @@ class EvaluationSerializer(serializers.ModelSerializer):
         return evaluation
     
 class TaskSubmissionSerializer(serializers.ModelSerializer):
-    task = SimpleTaskSerializer()
+    task = TaskSerializer()
     applicant = SimpleApplicantSerializer()
+    status = serializers.SerializerMethodField(method_name="get_status")
     
     class Meta:
         model = TaskSubmission
-        fields ='__all__'
+        fields =["id", "status", "submited_url", "submited_file", "submitted_text", "task", "applicant", "updated", "created"]
+
+    def get_status(self, submitted: TaskSubmission):
+            task = submitted.task
+            applicant = submitted.applicant
+            try:
+                task_status = TaskStatus.objects.get(task=task, applicant=applicant)
+                return task_status.status
+            except TaskStatus.DoesNotExist:
+                print("Task status does not exist for the given task and applicant.")
+                return None  # or handle the absence of a status as needed
+            except TaskStatus.MultipleObjectsReturned:
+                print("Multiple task statuses found for the given task and applicant.")
+                return None  # or handle the presence of multiple statuses as needed
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["status"] = self.get_status(instance)
+        return representation
         
 class AssignmentSerializer(serializers.ModelSerializer):
 
