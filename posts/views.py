@@ -97,12 +97,15 @@ class EvaluationViewSet(ModelViewSet):
     filterset_fields = ["applicant"]
 
 class PostRequirementsViewSet(ModelViewSet):
-    queryset= Requirement.objects.all()
     serializer_class = RequirementSerializer
 
     def get_serializer_context(self,*args,**kwargs):
         post_pk =  self.kwargs.get('post_pk')
         return {'post_pk':post_pk}
+    
+    def get_queryset(self):
+        post_pk = self.kwargs.get("post_pk")
+        return Requirement.objects.filter(post__id=post_pk)
     
 class PostStatusViewSet(ModelViewSet):
     queryset = PostStatus.objects.all()

@@ -46,6 +46,9 @@ uvcoordinator_assign.register('assignments', views.UvCoordinatorAssignmentViewSe
 uvcoordinator_students = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
 uvcoordinator_students.register('students', views.UvCoordinatorStudents, basename="UvCoordniators_student")
 
+uvcoordinator_accepted_students = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
+uvcoordinator_accepted_students.register('accepted', views.UvCoordinatorAcceptedStudents, basename="UvCoordniators_accepted_student")
+
 uvsupervisor_students = routers.NestedDefaultRouter(router,'UvSupervisors',lookup='UvSupervisors')
 uvsupervisor_students.register('students', views.UvSupervisorStudents, basename="UvSupervisors_student")
 
@@ -80,6 +83,8 @@ urlpatterns = (
     uvsupervisor_students.urls+
     uvsupervisor_evaluations.urls+
     system_coordinator_submitted_tasks_router.urls+
-    accepted_posts.urls
+    accepted_posts.urls+
+    uvcoordinator_accepted_students.urls
+
     
 )

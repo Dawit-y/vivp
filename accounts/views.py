@@ -152,6 +152,14 @@ class UvCoordinatorStudents(ModelViewSet):
         UvCoordniators_pk = self.kwargs.get("UvCoordniators_pk")
         uv_coordinator = get_object_or_404(UniversityCoordinator, id=UvCoordniators_pk)
         return uv_coordinator.get_students()
+    
+class UvCoordinatorAcceptedStudents(ModelViewSet):
+    serializer_class = StudentSerializer
+
+    def get_queryset(self):
+        UvCoordniators_pk = self.kwargs.get("UvCoordniators_pk")
+        uv_coordinator = get_object_or_404(UniversityCoordinator, id=UvCoordniators_pk)
+        return AcceptedStudents.objects.filter(coordinator=uv_coordinator)
          
 
 class UvSupervisorStudents(ModelViewSet):

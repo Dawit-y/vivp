@@ -236,3 +236,19 @@ class Notification(models.Model):
         ]
         ordering = ['-updated', '-created']
         get_latest_by = "created"
+
+
+class AcceptedStudents(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    coordinator = models.ForeignKey(UniversityCoordinator, on_delete=models.CASCADE)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Accepted Student'
+        verbose_name_plural = 'Accepted Students'
+
+    def __str__(self):
+        return f"{self.student} accepted by {self.coordinator}"
+
+    

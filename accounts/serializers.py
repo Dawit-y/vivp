@@ -111,3 +111,9 @@ class NotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = "__all__"
+
+class AcceptedStudentsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AcceptedStudents
+        fields = "__all__"
