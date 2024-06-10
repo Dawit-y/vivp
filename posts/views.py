@@ -24,7 +24,6 @@ from .permissions import *
 
 
 class PostViewSet(ModelViewSet):
-    serializer_class = PostSerializer
     permission_classes = [PostPermission]
     filterset_fields = ["type"]
 
@@ -32,6 +31,11 @@ class PostViewSet(ModelViewSet):
         if self.request.user.is_superuser:
             return Post.objects.all()   
         return Post.objects.filter(is_approved=True)
+    
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return PostCreateSerializer
+        return PostSerializer
     
 class PostApplicationsViewSet(ModelViewSet):
     serializer_class = ApplicationSerializer

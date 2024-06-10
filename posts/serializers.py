@@ -32,6 +32,41 @@ class PostSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Either organization or system coordinator must be set.')
         return attrs
 
+class PostCreateSerializer(serializers.ModelSerializer):
+    system_coordinator = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_staff=True, is_superuser=False), required=False, allow_null=True)
+    organization = serializers.PrimaryKeyRelatedField(queryset=Organization.objects.all(), required=False, allow_null=True)
+
+    class Meta:
+        model = Post
+        fields = "__all__"
+
+    def get_tasks_count(self, post: Post):
+        return post.get_tasks().count()
+
+    def validate(self, attrs):
+        system_coordinator = attrs.get('system_coordinator')
+        organization = attrs.get('organization')
+
+        if organization and system_coordinator:
+            raise serializers.ValidationError('Only one of organization or system coordinator should be set.')
+        if not organization and not system_coordinator:
+            raise serializers.ValidationError('Either organization or system coordinator must be set.')
+        return attrs
+
+    def create(self, validated_data):
+        system_coordinator = validated_data.pop('system_coordinator', None)
+        organization = validated_data.pop('organization', None)
+
+        post = Post.objects.create(**validated_data)
+
+        if system_coordinator:
+            post.system_coordinator = system_coordinator
+            post.save()
+        elif organization:
+            post.organization = organization
+            post.save()
+
+        return post
 class TaskSerializer(serializers.ModelSerializer):
     sections_count = serializers.SerializerMethodField(method_name="get_task_section_count")
     post_id = serializers.SerializerMethodField(method_name="get_post_id")
