@@ -55,6 +55,9 @@ system_coordinator_posts_router.register("posts", views.SystemCoordinatorPosts, 
 system_coordinator_applications_router = routers.NestedDefaultRouter(router, 'systemCoordinators', lookup='systemCoordinators')
 system_coordinator_applications_router.register("applications", views.SystemCoordinatorApplications, basename="system-coordinator-applications")
 
+system_coordinator_submitted_tasks_router = routers.NestedDefaultRouter(router, 'systemCoordinators', lookup='systemCoordinators')
+system_coordinator_submitted_tasks_router.register("submitted_tasks", views.SystemCoordinatorSubmittedTasksView, basename="system-coordinator-submittedtasks")
+
 
 urlpatterns = (
     router.urls +
@@ -72,6 +75,7 @@ urlpatterns = (
     system_coordinator_applications_router.urls+
     uvcoordinator_students.urls+
     uvsupervisor_students.urls+
-    uvsupervisor_evaluations.urls
+    uvsupervisor_evaluations.urls+
+    system_coordinator_submitted_tasks_router.urls
     
 )
