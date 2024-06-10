@@ -1,5 +1,5 @@
 UNIVERSITY_CHOICES = [
-    
+("None", "None"),
 ("Adama Science and Technology University","Adama Science and Technology University"),
 ("Addis Ababa Science and Technology University","Addis Ababa Science and Technology University"),
 ("Addis Ababa University","Addis Ababa University"),
