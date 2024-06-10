@@ -25,6 +25,9 @@ evaluatons_router.register('evaluations', views.ApplicantEvaluationViewSet, base
 submitted_tasks_router = routers.NestedDefaultRouter(router, 'applicants', lookup='applicant')
 submitted_tasks_router.register('submitted_tasks', views.ApplicantSubmittedTasks, basename="submitted-tasks-applicant")
 
+accepted_posts = routers.NestedDefaultRouter(router, 'applicants', lookup='applicant')
+accepted_posts.register('posts', views.ApplicantAcceptedPostsViewSet, basename="accepted-post-applicant")
+
 organization_post_router= routers.NestedDefaultRouter(router, 'organizations',lookup='organization')
 organization_post_router.register('posts', views.OrganizationPostViewSet, basename="organization_post")
 
@@ -38,7 +41,7 @@ organization_application_router = routers.NestedDefaultRouter(router,'organizati
 organization_application_router.register('applications', views.OrganizationApplicationViewSet, basename="organization_application")
 
 uvcoordinator_assign = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
-uvcoordinator_assign.register('assignments', views.UvCoordinatorassignment, basename="UvCoordniators_assignment")
+uvcoordinator_assign.register('assignments', views.UvCoordinatorAssignmentViewSet, basename="UvCoordniators_assignment")
 
 uvcoordinator_students = routers.NestedDefaultRouter(router,'UvCoordniators',lookup='UvCoordniators')
 uvcoordinator_students.register('students', views.UvCoordinatorStudents, basename="UvCoordniators_student")
@@ -76,6 +79,7 @@ urlpatterns = (
     uvcoordinator_students.urls+
     uvsupervisor_students.urls+
     uvsupervisor_evaluations.urls+
-    system_coordinator_submitted_tasks_router.urls
+    system_coordinator_submitted_tasks_router.urls+
+    accepted_posts.urls
     
 )

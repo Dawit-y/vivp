@@ -9,6 +9,7 @@ from accounts.serializers import ApplicantSerializer, OrganizationSerializer
 class PostSerializer(serializers.ModelSerializer):
     system_coordinator = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_staff=True, is_superuser=False), required=False, allow_null=True)
     tasks_count = serializers.SerializerMethodField(method_name="get_tasks_count")
+    organization = SimpleOrganizationSerializer()
     class Meta:
         model = Post
         fields = "__all__"
@@ -209,20 +210,31 @@ class SupervisorCommentSerializer(serializers.ModelSerializer):
         model = SupervisorComment
         fields = '__all__'
 
+class SupervisorEvaluationListSerializer(serializers.ListSerializer):
+
+   def create(self, validated_data):
+        UvSupervisor_pk = self.context.get('UvSupervisor_pk')
+        UvSupervisor = get_object_or_404(UniversitySupervisor, pk=UvSupervisor_pk)
+        print(UvSupervisor)
+        evaluations = [SupervisorEvaluation(supervisor=UvSupervisor, **item) for item in validated_data]
+        return SupervisorEvaluation.objects.bulk_create(evaluations)
+    
 class SupervisorEvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupervisorEvaluation
-        fields = '__all__'
+        fields = ['id', 'applicant', 'document_evaluation', 'presentation_evaluation', 'firm_evaluation', 'supervisor_evaluation','updated', 'created']
+        list_serializer_class = SupervisorEvaluationListSerializer
 
-class SupervisorEvaluationListSerializer(serializers.ListSerializer):
-    child = SupervisorEvaluationSerializer()
-    allow_null = False
-    many = True
+    def create(self,validated_data):
+        UvSupervisor_pk = self.context.get('UvSupervisor_pk')
+        UvSupervisor = get_object_or_404(UniversitySupervisor, pk=UvSupervisor_pk)
+        print(UvSupervisor)
+        evaluation = SupervisorEvaluation.objects.create(
+            supervisor=UvSupervisor,
+            **validated_data
+        )
+        return evaluation
 
-    def create(self, validated_data):
-        evaluations = [SupervisorEvaluation(**item) for item in validated_data]
-        return SupervisorEvaluation.objects.bulk_create(evaluations)
-    
 class PostStatusSerializer(serializers.ModelSerializer):
 
     class Meta:

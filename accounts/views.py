@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.response import Response
+from rest_framework import status
 
 from .user_serializer import UserCreateSerializer, UserSerializer
 from .serializers import *
@@ -49,6 +51,14 @@ class ApplicantApplicationsViewSet(ModelViewSet):
     def get_queryset(self):
         applicant_pk = self.kwargs.get("applicant_pk")
         return Application.objects.filter(applicant__id=applicant_pk)
+    
+class ApplicantAcceptedPostsViewSet(ModelViewSet):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        applicant_pk = self.kwargs.get("applicant_pk")
+        accepted_applications = Application.objects.select_related("post").filter(applicant=applicant_pk, status = "accepted")
+        return [app.post for app in accepted_applications]
     
 class ApplicantCertificatesViewSet(ModelViewSet):
     serializer_class = CertificateSerializer
@@ -115,7 +125,7 @@ class OrganizationApplicationViewSet(ModelViewSet):
         applications = Application.objects.filter(post__in = posts)
         return applications
     
-class UvCoordinatorassignment(ModelViewSet):
+class UvCoordinatorAssignmentViewSet(ModelViewSet):
     serializer_class = AssignmentSerializer
 
     def get_queryset(self):
@@ -141,21 +151,34 @@ class UvSupervisorStudents(ModelViewSet):
     http_method_names = ['get', 'head', 'options']
 
     def get_queryset(self):
-        UvSupervisor_pk = self.kwargs.get("UvSupervisor_pk")
+        UvSupervisor_pk = self.kwargs.get("UvSupervisors_pk")
         uv_supervisor = get_object_or_404(UniversitySupervisor, id=UvSupervisor_pk)
         return uv_supervisor.get_students()
 
 
  
 class SupervisorEvaluationViewSet(ModelViewSet):
-    queryset = SupervisorEvaluation.objects.all()
     serializer_class = SupervisorEvaluationSerializer
 
     def get_serializer(self, *args, **kwargs):
         if isinstance(kwargs.get('data', {}), list):
             kwargs['many'] = True
-        return super(SupervisorEvaluationViewSet, self).get_serializer(*args, **kwargs)
-         
+        return super(SupervisorEvaluationViewSet, self).get_serializer(*args, **kwargs)   
+    
+    def get_queryset(self):
+        print(self.kwargs)
+        UvSupervisor_pk = self.kwargs.get("UvSupervisors_pk")
+        uv_supervisor = get_object_or_404(UniversitySupervisor, id=UvSupervisor_pk)
+        return SupervisorEvaluation.objects.filter(supervisor=uv_supervisor)
+    
+    def get_serializer_context(self, *args, **kwargs):
+        UvSupervisor_pk = self.kwargs.get("UvSupervisors_pk")
+        return {'UvSupervisor_pk':UvSupervisor_pk }  
+
+    def get_serializer(self, *args, **kwargs):
+        if isinstance(kwargs.get('data', {}), list):
+            kwargs['many'] = True
+        return super(SupervisorEvaluationViewSet, self).get_serializer(*args, **kwargs)   
         
 class EvaluateViewSet(ModelViewSet):
     serializer_class = EvaluationSerializer

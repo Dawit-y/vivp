@@ -265,6 +265,7 @@ class PostStatus(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.INPROGRESS)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     applicant = models.ForeignKey(Applicant, on_delete=models.CASCADE)
+    allow_supervisor = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
