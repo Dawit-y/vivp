@@ -154,7 +154,9 @@ class UvSupervisorStudents(ModelViewSet):
         UvSupervisor_pk = self.kwargs.get("UvSupervisors_pk")
         uv_supervisor = get_object_or_404(UniversitySupervisor, id=UvSupervisor_pk)
         return uv_supervisor.get_students()
-    
+
+
+ 
 class SupervisorEvaluationViewSet(ModelViewSet):
     serializer_class = SupervisorEvaluationSerializer
 
@@ -202,7 +204,15 @@ class SystemCoordinatorPosts(ModelViewSet):
         serializer.validated_data['system_coordinator'] = system_coordinator_pk
         instance = serializer.save()
         return instance
+class SystemCoordinatorSubmittedTasksView(ModelViewSet):
+    serializer_class = TaskSubmissionSerializer
+    http_method_names = ['get', 'head', 'options']
     
+    def get_queryset(self):
+        system_coordinator_pk = self.kwargs.get("systemCoordinators_pk")
+        posts = Post.objects.filter(system_coordinator_id=system_coordinator_pk)
+        submitted_tasks = TaskSubmission.objects.filter(task__post__in=posts)
+        return submitted_tasks   
 class SystemCoordinatorApplications(ModelViewSet):
     serializer_class = ApplicationSerializer
     http_method_names = ['get', 'head', 'options']
