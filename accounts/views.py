@@ -70,7 +70,7 @@ class ApplicantCertificatesViewSet(ModelViewSet):
     
 class ApplicantNotificationsViewSet(ModelViewSet):
     serializer_class = NotificationsSerializer
-    http_method_names = ['get', 'head', 'options']
+    http_method_names = ['get', 'head', 'options', 'put', 'patch']
     permission_classes = [IsApplicant | IsSuperUser]
 
     def get_queryset(self):
