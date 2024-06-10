@@ -131,11 +131,19 @@ class UvCoordinatorAssignmentViewSet(ModelViewSet):
     def get_queryset(self):
         UvCoordniators_pk = self.kwargs.get("UvCoordniators_pk")
         return Assignment.objects.filter(coordinator_id=UvCoordniators_pk)
-    
+
     def get_serializer_context(self, *args, **kwargs):
-        UvCoordniators_pk=self.kwargs.get("UvCoordniators_pk")
-        return {'UvCoordniators_pk':UvCoordniators_pk }    
-   
+        UvCoordniators_pk = self.kwargs.get("UvCoordniators_pk")
+        return {'UvCoordniators_pk': UvCoordniators_pk}
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save()
 class UvCoordinatorStudents(ModelViewSet):
     serializer_class = StudentSerializer
     http_method_names = ['get', 'head', 'options']
@@ -160,25 +168,20 @@ class UvSupervisorStudents(ModelViewSet):
 class SupervisorEvaluationViewSet(ModelViewSet):
     serializer_class = SupervisorEvaluationSerializer
 
-    def get_serializer(self, *args, **kwargs):
-        if isinstance(kwargs.get('data', {}), list):
-            kwargs['many'] = True
-        return super(SupervisorEvaluationViewSet, self).get_serializer(*args, **kwargs)   
-    
     def get_queryset(self):
         print(self.kwargs)
         UvSupervisor_pk = self.kwargs.get("UvSupervisors_pk")
         uv_supervisor = get_object_or_404(UniversitySupervisor, id=UvSupervisor_pk)
         return SupervisorEvaluation.objects.filter(supervisor=uv_supervisor)
-    
-    def get_serializer_context(self, *args, **kwargs):
-        UvSupervisor_pk = self.kwargs.get("UvSupervisors_pk")
-        return {'UvSupervisor_pk':UvSupervisor_pk }  
 
-    def get_serializer(self, *args, **kwargs):
-        if isinstance(kwargs.get('data', {}), list):
-            kwargs['many'] = True
-        return super(SupervisorEvaluationViewSet, self).get_serializer(*args, **kwargs)   
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save() 
         
 class EvaluateViewSet(ModelViewSet):
     serializer_class = EvaluationSerializer

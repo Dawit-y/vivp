@@ -191,49 +191,39 @@ class TaskSubmissionSerializer(serializers.ModelSerializer):
         return representation
         
 class AssignmentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Assignment
-        fields = ['student','supervisor','updated','created']
+        fields = ['student', 'supervisor', 'updated', 'created']
 
-    def create(self,validated_data):
+    def create(self, validated_data):
         uv_coordinators_pk = self.context.get('UvCoordniators_pk')
         uv_coordinator = get_object_or_404(UniversityCoordinator, id=uv_coordinators_pk)
-        assignment = Assignment.objects.create(
-            coordinator=uv_coordinator,
-            **validated_data
-        )
-        return assignment
 
+        if isinstance(validated_data, list):
+            assignments = [Assignment(coordinator=uv_coordinator, student=data['student'], supervisor=data['supervisor'], updated=data['updated'], created=data['created']) for data in validated_data]
+            return Assignment.objects.bulk_create(assignments)
+        else:
+            assignment = Assignment(coordinator=uv_coordinator, **validated_data)
+            assignment.save()
+            return assignment
 class SupervisorCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupervisorComment
         fields = '__all__'
 
-class SupervisorEvaluationListSerializer(serializers.ListSerializer):
-
-   def create(self, validated_data):
-        UvSupervisor_pk = self.context.get('UvSupervisor_pk')
-        UvSupervisor = get_object_or_404(UniversitySupervisor, pk=UvSupervisor_pk)
-        print(UvSupervisor)
-        evaluations = [SupervisorEvaluation(supervisor=UvSupervisor, **item) for item in validated_data]
-        return SupervisorEvaluation.objects.bulk_create(evaluations)
-    
 class SupervisorEvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupervisorEvaluation
-        fields = ['id', 'applicant', 'document_evaluation', 'presentation_evaluation', 'firm_evaluation', 'supervisor_evaluation','updated', 'created']
-        list_serializer_class = SupervisorEvaluationListSerializer
+        fields = '__all__'
 
-    def create(self,validated_data):
-        UvSupervisor_pk = self.context.get('UvSupervisor_pk')
-        UvSupervisor = get_object_or_404(UniversitySupervisor, pk=UvSupervisor_pk)
-        print(UvSupervisor)
-        evaluation = SupervisorEvaluation.objects.create(
-            supervisor=UvSupervisor,
-            **validated_data
-        )
-        return evaluation
+    def create(self, validated_data):
+        if isinstance(validated_data, list):
+            evaluations = [SupervisorEvaluation(**data) for data in validated_data]
+            return SupervisorEvaluation.objects.bulk_create(evaluations)
+        else:
+            evaluation = SupervisorEvaluation(**validated_data)
+            evaluation.save()
+            return evaluation
 
 class PostStatusSerializer(serializers.ModelSerializer):
 

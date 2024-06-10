@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from .user_serializer import UserCreateSerializer
+from .simple_serializer import SimplerPostSerializer
 from .models import *
 from posts.models import Application, PostStatus
+
 
 class ApplicantSerializer(serializers.ModelSerializer):
 
@@ -23,32 +26,20 @@ class ApplicantSerializer(serializers.ModelSerializer):
         return applicant
 
 class StudentSerializer(serializers.ModelSerializer):
-    post_id = serializers.SerializerMethodField()
-    
+    posts = serializers.SerializerMethodField()
+
     class Meta:
         model = Student
-        fields = ["id", "first_name", "last_name", "email", "password", "age", "gender", "phone_number","avatar", "resume", "portfolio_link", "university", "university_id_number","batch","department", "date_joined", "post_id"]
+        fields = ["id", "first_name", "last_name", "email", "password", "age", "gender", "phone_number", "avatar", "resume", "portfolio_link", "university", "university_id_number", "batch", "department", "date_joined", "posts"]
         extra_kwargs = {
-            'password' : {'write_only' : True},
-            'date_joined' : {"read_only": True}
+            'password': {'write_only': True},
+            'date_joined': {"read_only": True}
         }
 
-    def get_post_id(self, student: Student):
-        applicant_pk = student.applicant.id
-        accepted_applications = Application.objects.select_related("post").filter(applicant=applicant_pk, status = "accepted")
-        posts = [app.post for app in accepted_applications]
-        for post in posts:
-            status = PostStatus.objects.get(post=post, applicant=applicant_pk)
-            if status.allow_supervisor:
-                return post.id
-        return None
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        request = self.context.get('request')
-        if request and request.resolver_match and 'pk' in request.resolver_match.kwargs:
-            representation["post_id"] = self.get_post_id(instance)
-        return representation
+    def get_posts(self, student: Student):
+        accepted_applications = Application.objects.filter(applicant=student, status="accepted")
+        posts = [application.post for application in accepted_applications]
+        return SimplerPostSerializer(posts, many=True).data
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
@@ -57,6 +48,7 @@ class StudentSerializer(serializers.ModelSerializer):
             student.set_password(password)
             student.save()
         return student
+   
     
 class OrganizationSerializer(serializers.ModelSerializer):
     supervisor = UserCreateSerializer()
