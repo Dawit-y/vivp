@@ -117,3 +117,11 @@ class AcceptedStudentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AcceptedStudents
         fields = "__all__"
+
+class AddAcceptedStudentsSerializer(serializers.ModelSerializer):
+    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
+    coordinator = serializers.PrimaryKeyRelatedField(queryset=UniversityCoordinator.objects.all())
+
+    class Meta:
+        model = AcceptedStudents
+        fields = "__all__"

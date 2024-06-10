@@ -71,7 +71,7 @@ class ApplicantCertificatesViewSet(ModelViewSet):
 class ApplicantNotificationsViewSet(ModelViewSet):
     serializer_class = NotificationsSerializer
     http_method_names = ['get', 'head', 'options']
-    permission_classes = [IsApplicant, IsSuperUser]
+    permission_classes = [IsApplicant | IsSuperUser]
 
     def get_queryset(self):
         applicant_pk = self.kwargs.get("applicant_pk")
@@ -154,7 +154,10 @@ class UvCoordinatorStudents(ModelViewSet):
         return uv_coordinator.get_students()
     
 class UvCoordinatorAcceptedStudents(ModelViewSet):
-    serializer_class = StudentSerializer
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return AddAcceptedStudentsSerializer
+        return AcceptedStudentsSerializer
 
     def get_queryset(self):
         UvCoordniators_pk = self.kwargs.get("UvCoordniators_pk")

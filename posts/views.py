@@ -87,8 +87,12 @@ class TaskSectionsViewSet(ModelViewSet):
     
 class ApplicationViewSet(ModelViewSet):
     queryset = Application.objects.all()
-    serializer_class = ApplicationSerializer
     filterset_fields = ["applicant", "post", "status"]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return AddApplicationSerializer
+        return ApplicationSerializer
 
 class EvaluationViewSet(ModelViewSet):
     queryset = Evaluation.objects.all()

@@ -151,6 +151,15 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = "__all__"
+        read_only_fields = ["applicant", "post"]
+
+class AddApplicationSerializer(serializers.ModelSerializer):
+    applicant = serializers.PrimaryKeyRelatedField(queryset=Applicant.objects.all())
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+
+    class Meta:
+        model = Application
+        fields = "__all__"
     
 class PostApplicationSerializer(serializers.ModelSerializer):
 
