@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from django.core.files import File
 from django.conf import settings
+from urllib.parse import urljoin
 
 import stripe
 from xhtml2pdf import pisa
@@ -132,7 +133,7 @@ class CertificateViewSet(ModelViewSet):
         certificate_serializer = self.get_serializer(certificate)
 
         if certificate.pdf_file:
-            return Response({"error" : "Certificate already created"}, status=403)
+            return Response({"error": "Certificate already created"}, status=403)
 
         if certificate.post.is_paid:
             template = get_template('premium_certificate_template.html')
@@ -146,10 +147,14 @@ class CertificateViewSet(ModelViewSet):
         pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
 
         if not pdf.err:
-            response = HttpResponse(result.getvalue(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{certificate.applicant.get_full_name()}_certificate.pdf"'
-            certificate.pdf_file.save(f'{certificate.applicant.get_full_name()}_certificate.pdf', File(result), save=True)
-            return response
+            # Save the PDF to the model
+            pdf_filename = f'{certificate.applicant.get_full_name()}_certificate.pdf'
+            certificate.pdf_file.save(pdf_filename, File(result), save=True)
+
+            # Construct the URL for the saved PDF file
+            pdf_url = urljoin(settings.MEDIA_URL, certificate.pdf_file.name)
+            
+            return JsonResponse({'pdf_url': pdf_url})
 
         return Response({'error': 'Error generating PDF'}, status=500)
     

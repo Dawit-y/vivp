@@ -116,7 +116,7 @@ class AcceptedStudentsSerializer(serializers.ModelSerializer):
     student = StudentSerializer()
     class Meta:
         model = AcceptedStudents
-        fields = "__all__"
+        fields = ['student']
 
 class AddAcceptedStudentsSerializer(serializers.ModelSerializer):
     student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())

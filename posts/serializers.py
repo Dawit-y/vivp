@@ -181,7 +181,7 @@ class CertificateSerializer(serializers.ModelSerializer):
     post = SimplePostSerializer()
     class Meta:
         model = Certificate
-        fields = ["applicant", "post", "pdf_file", "updated", "created"]
+        fields = ["id", "applicant", "post", "pdf_file", "updated", "created"]
 
 class EvaluationSerializer(serializers.ModelSerializer):
 
