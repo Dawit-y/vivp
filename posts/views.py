@@ -46,7 +46,7 @@ class PostApplicationsViewSet(ModelViewSet):
 
 class PostTaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
-    permission_classes = [IsSuperUser | HasApplicantPaid | IsOrganization | IsSystemCoordinator]
+    permission_classes = [IsSuperUser | HasApplicantPaid | IsOrganization | IsSystemCoordinator | IsUniversitySupervisor | IsUniversityCoordinator]
 
     def get_queryset(self):
         post_pk = self.kwargs.get("post_pk")

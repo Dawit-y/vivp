@@ -270,7 +270,8 @@ class SupervisorEvaluationSerializer(serializers.ModelSerializer):
             return evaluation
 
 class PostStatusSerializer(serializers.ModelSerializer):
-
+    applicant = ApplicantSerializer()
+    post = PostSerializer()
     class Meta:
         model = PostStatus
         fields = "__all__"

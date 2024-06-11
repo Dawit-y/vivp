@@ -113,7 +113,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class AcceptedStudentsSerializer(serializers.ModelSerializer):
-
+    student = StudentSerializer()
     class Meta:
         model = AcceptedStudents
         fields = "__all__"
