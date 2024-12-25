@@ -10,6 +10,7 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     
 class UserSerializer(BaseUserSerializer):
     role = serializers.SerializerMethodField(method_name="get_role")
+    
     class Meta(BaseUserSerializer.Meta):
         fields = ['id', 'email', 'first_name', 'last_name', "role"]
         ref_name = "user_serializer"

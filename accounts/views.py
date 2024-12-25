@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
 from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +10,63 @@ from .serializers import *
 from .permissions import *
 from posts.serializers import *
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
+from .user_serializer import MyTokenObtainPairSerializer
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            refresh_token = response.data.pop("refresh", None)
+            if refresh_token:
+                response.set_cookie(
+                    key="refresh_token",
+                    value=refresh_token,
+                    httponly=True,
+                    secure=True,  # Use True in production with HTTPS
+                    samesite="None"
+                )
+        return response
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refresh_token")
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token not provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        mutable_data = request.data.copy()
+        mutable_data["refresh"] = refresh_token
+        request._full_data = mutable_data
+
+        # Call the parent post method to get the tokens
+        response = super().post(request, *args, **kwargs)
+
+        # Check if the response is successful and modify it
+        if response.status_code == 200:
+            refresh = response.data.pop("refresh", None)  # Remove the refresh token from the JSON response
+            if refresh:
+                # Set the refresh token as an HTTP-only cookie
+                response.set_cookie(
+                    key="refresh_token",
+                    value=refresh,
+                    httponly=True,
+                    secure=True,  # Set to False in development if HTTPS is not used
+                    samesite="None",
+                    max_age=7 * 24 * 60 * 60  # Set cookie expiry to 7 days
+                )
+        return response
+
+class LogoutView(APIView):
+    def post(self, request, *args, **kwargs):
+        response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        response.delete_cookie("refresh_token")
+        return response
 
 class ApplicantViewSet(ModelViewSet):
     queryset = Applicant.objects.all()

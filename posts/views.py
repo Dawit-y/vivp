@@ -17,6 +17,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import FormParser , MultiPartParser
 
 from accounts.permissions import *
 from .models import *
@@ -27,6 +28,7 @@ from .permissions import *
 class PostViewSet(ModelViewSet):
     permission_classes = [PostPermission]
     filterset_fields = ["type"]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         if self.request.user.is_superuser:

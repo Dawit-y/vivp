@@ -1,3 +1,4 @@
+from django.urls import path
 from rest_framework_nested import routers
 from . import views
 
@@ -85,6 +86,10 @@ urlpatterns = (
     system_coordinator_submitted_tasks_router.urls+
     accepted_posts.urls+
     uvcoordinator_accepted_students.urls
-
-    
 )
+
+urlpatterns += [
+    path("auth/jwt/create/", views.CustomTokenObtainPairView.as_view(), name="jwt-create"),
+    path("auth/jwt/refresh/", views.CustomTokenRefreshView.as_view(), name="jwt-refresh"),
+    path("auth/logout/", views.LogoutView.as_view(), name="logout"),
+]
