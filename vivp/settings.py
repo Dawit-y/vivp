@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'django_ckeditor_5',
     "corsheaders",
     "djoser",
-    'drf_yasg',
+    'drf_spectacular',
 
     "accounts",
     "posts",
@@ -166,6 +166,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASS' : ["rest_framework.permissions.AllowAny"],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DATETIME_FORMAT': '%d %b %Y'
 }
 
@@ -331,4 +332,11 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+
+# drf-spectacular OpenAPI schema settings
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'VIVP API',
+    'DESCRIPTION': 'Documentation for VIVP API',
+    'VERSION': '1.0.0',
 }
